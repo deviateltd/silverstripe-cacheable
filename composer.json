@@ -1,0 +1,20 @@
+{
+  "name": "silverstripe/cacheable-navigation",
+  "description": "SilverStripe page and page navigation cacheable",
+  "type": "silverstripe-module",
+  "keywords": ["silverstripe", "navigation", "cached", "cacheable"],
+  "authors": [
+    {
+      "name": "Normann Lou",
+      "email": "normann.lou@deviate.net.nz"
+    }
+  ],
+  "require": {
+    "silverstripe/framework": ">=3.1",
+    "silverstripe/cms": ">=3.1"
+  },
+  "suggest": {
+    "silverstripe/queuedjobs": "Adds a queued job for refreshing page cache and cached navigation object"
+  },
+  "minimum-stability": "dev"
+}
