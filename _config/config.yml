@@ -1,0 +1,6 @@
+---
+Name: cacheable_navigation_config
+After:
+  - 'framework/*'
+  - 'cms/*'
+---

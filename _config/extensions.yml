@@ -1,0 +1,12 @@
+---
+Name: cacheable_navigation_extensions
+After:
+  - 'framework/*'
+  - 'cms/*'
+---
+SiteTree:
+  extensions:
+    - Cacheable
+SiteConfig:
+  extensions:
+    - SiteConfigCacheable
