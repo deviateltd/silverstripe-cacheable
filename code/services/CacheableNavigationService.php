@@ -98,12 +98,15 @@ class CacheableNavigationService{
         $site_map = $cached->get_site_map();
         $root_elements = $cached->get_root_elements();
         $model = $this->get_model();
-        if(!$model->ParentID){ // a root element need to be removed from $root_elements
-            if(isset($root_elements[$model->ID])) {
-                unset($root_elements[$model->ID]);
-                $cached->set_root_elements($root_elements);
-            }
-        }else{
+        if(isset($root_elements[$model->ID])) {
+            unset($root_elements[$model->ID]);
+            $cached->set_root_elements($root_elements);
+        }
+        $parentCached = $site_map[$model->ID]->getParent();
+        if($parentCached && $parentCached->ID && isset($site_map[$parentCached->ID])){
+            $site_map[$parentCached->ID]->removeChild($cacheable->ID);
+        }
+        if($model->ParentID)
             if(isset($site_map[$model->ParentID])){
                 $site_map[$model->ParentID]->removeChild($model->ID);
             }
