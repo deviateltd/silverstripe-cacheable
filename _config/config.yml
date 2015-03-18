@@ -3,4 +3,9 @@ Name: cacheable_navigation_config
 After:
   - 'framework/*'
   - 'cms/*'
+Only:
+  Environment: 'dev'
 ---
+Injector:
+  MySQLDatabase:
+    class: MySQLDebuggableDatabase

@@ -115,7 +115,9 @@ class Cacheable extends SiteTreeExtension{
     }
 
     public function CachedData(){
-        if($this->owner->exists()){
+        $cachednavoff = isset($_REQUEST['cachednav'])&& $_REQUEST['cachednav']=='off'&&Director::isDev();
+
+        if(!$cachednavoff && $this->owner->exists()){
             if ($cachedNavigiation = Config::inst()->get('Cacheable', '_cached_navigation')) {
                 if($cachedNavigiation->isUnlocked() && $cachedNavigiation->get_site_config()){
                     $site_map = $cachedNavigiation->get_site_map();
