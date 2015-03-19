@@ -285,10 +285,9 @@ class CacheableSiteTree extends CacheableData{
     public function CachedNavigation()
     {
         if ($cachedNavigiation = Config::inst()->get('Cacheable', '_cached_navigation')) {
-            if ($cachedNavigiation->isUnlocked() && $cachedNavigiation->get_site_config()) {
+            if ($cachedNavigiation->isUnlocked() && $cachedNavigiation->get_completed()) {
                 return $cachedNavigiation;
             }
-
         }
     }
 }
