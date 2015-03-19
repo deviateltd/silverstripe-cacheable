@@ -40,6 +40,7 @@ class CacheableNavigation_Rebuild extends BuildTask{
                         $service->refreshCachedPage();
                     }
                 }
+                $service->completeBuild();
                 echo $pages->count()." pages being cached in $stage mode for site ".$config->ID.$line_break;
             }
             if(class_exists('Subsite')){
