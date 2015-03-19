@@ -23,6 +23,22 @@ class Cacheable extends SiteTreeExtension{
         }
         $service->set_config($siteConfig);
         if($_cached_navigation = $service->getCacheableFrontEnd()->load($service->getIdentifier())){
+            if(!$_cached_navigation->get_completed()) {
+                if(class_exists('Subsite')){
+                    $pages = DataObject::get("SiteTree", "\"SubsiteID\" = '".$siteConfig->SubsiteID."'");
+                }else{
+                    $pages = DataObject::get("SiteTree");
+                }
+                if($pages->exists()){
+                    foreach($pages as $page){
+                        $service->set_model($page);
+                        $service->refreshCachedPage();
+                    }
+                }
+                $service->completeBuild();
+                $_cached_navigation = $service->getCacheableFrontEnd()->load($service->getIdentifier());
+
+            }
             Config::inst()->update('Cacheable', '_cached_navigation', $_cached_navigation);
         }
     }
@@ -103,9 +119,11 @@ class Cacheable extends SiteTreeExtension{
     }
 
     public function CachedNavigation(){
-        if($this->owner->exists()) {
+        $cachednavoff = isset($_REQUEST['cachednav'])&& $_REQUEST['cachednav']=='off'&&Director::isDev();
+
+        if(!$cachednavoff && $this->owner->exists()) {
             if ($cachedNavigiation = Config::inst()->get('Cacheable', '_cached_navigation')) {
-                if ($cachedNavigiation->isUnlocked() && $cachedNavigiation->get_site_config()) {
+                if ($cachedNavigiation->isUnlocked() && $cachedNavigiation->get_completed()) {
                     return $cachedNavigiation;
                 }
 
@@ -119,7 +137,7 @@ class Cacheable extends SiteTreeExtension{
 
         if(!$cachednavoff && $this->owner->exists()){
             if ($cachedNavigiation = Config::inst()->get('Cacheable', '_cached_navigation')) {
-                if($cachedNavigiation->isUnlocked() && $cachedNavigiation->get_site_config()){
+                if($cachedNavigiation->isUnlocked() && $cachedNavigiation->get_completed()){
                     $site_map = $cachedNavigiation->get_site_map();
                     return $site_map[$this->owner->ID];
                 }

@@ -10,7 +10,7 @@ class TestController extends Controller{
     function index(){
         $currentStage = Versioned::current_stage();
         $stage_mode_mapping = array(
-            "Stage" => "stage",
+            //"Stage" => "stage",
             "Live"  => "live",
         );
         $siteConfig = SiteConfig::current_site_config();
@@ -22,17 +22,7 @@ class TestController extends Controller{
             $cache = $service->getCacheableFrontEnd();
             $id = $service->getIdentifier();
             $cached = $cache->load($id);
-            debug::show(count($cached->get_site_map()));
-            debug::show(count($cached->get_root_elements()));
-            foreach($cached->get_site_map() as $d){
-                //debug::show($d->ID.": ".$d->MenuTitle);
-                if(in_array($d->ID, array(2,6))) debug::show($d);
-            }
-            foreach($cached->get_root_elements() as $d){
-                //debug::show($d->ID.": ".$d->MenuTitle);
-                if(in_array($d->ID, array(2,6))) debug::show($d);
-            }
-
+            Debug::show($cached);
         }
         echo 'done';
         Versioned::set_reading_mode($currentStage);

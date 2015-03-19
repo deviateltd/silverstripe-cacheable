@@ -11,6 +11,7 @@ class CachedNavigation extends ArrayList {
     private $site_map = array();
     private $root_elements = array();
     private $locked = false;
+    private $completed = false;
 
     public function set_site_config($cached_site_config){
         $this->cached_site_config = $cached_site_config;
@@ -50,6 +51,14 @@ class CachedNavigation extends ArrayList {
 
     public function isUnlocked() {
         return $this->locked === false;
+    }
+
+    public function set_completed($bool) {
+        $this->completed = $bool;
+    }
+
+    public function get_completed() {
+        return $this->completed;
     }
 
     public function Menu($level=1){
@@ -106,5 +115,30 @@ class CachedNavigation extends ArrayList {
             }
         }
         return $ancestors;
+    }
+
+    public function debug(){
+        $message = "<h3>cacheable navigation object: ".get_class($this)."</h3>\n<ul>\n";
+        if($this->isLocked()) $message .= "<h4>The navigation object is locked.</h4>";
+        else $message .= "<h4>The navigation object is unlocked.</h4>";
+
+        if($this->get_completed()) $message .= "<h4>The navigation object is completed.</h4>";
+        else $message .= "<h4>The navigation object is incompleted.</h4>";
+
+        if($site_config = $this->get_site_config()) {
+            $message .= "<h4>The cached site config ID: ".$site_config->ID. "</h4>";
+        }
+
+        $message .= "<h4>The root elements:</h4>";
+        foreach($this->get_root_elements() as $element){
+            $message .= $element->debug_simple();
+        }
+
+        $message .= "<h4>The site map elements:</h4>";
+        foreach($this->get_site_map() as $element){
+            $message .= $element->debug_simple();
+        }
+
+        return $message;
     }
 }

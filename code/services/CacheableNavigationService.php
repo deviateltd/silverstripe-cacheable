@@ -174,4 +174,12 @@ class CacheableNavigationService{
         $cache_frontend->remove($id);
         $cache_frontend->save($cached, $id);
     }
+
+    public function completeBuild(){
+        $cache =  $this->getCacheableFrontEnd();
+        $id = $this->getIdentifier();
+        $cached = $cache->load($id);
+        $cached->set_completed(true);
+        $cache->save($cached, $id);
+    }
 }

@@ -225,6 +225,17 @@ class CacheableSiteTree extends CacheableData{
         return $message;
     }
 
+    function debug_simple(){
+        $message = "<h5>cacheable data: ".get_class($this)."</h5><ul>";
+        $message .= "<il>ID: ".$this->ID.". Title: ".$this->Title.". ClassName".$this->ClassName."</il>";
+        $parent = $this->getParent();
+        if($parent && $parent->exists()) {
+            $message .= "<il>Parent ID: ".$parent->ID.". Title: ".$parent->Title.". ClassName".$parent->ClassName."</il>";
+        }
+        $message .= "</ul>";
+        return $message;
+    }
+
     public function Menu($level=1){
         if($nav = $this->CachedNavigation()){
             if($level == 1) {

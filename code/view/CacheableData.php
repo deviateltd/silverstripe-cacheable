@@ -73,4 +73,10 @@ abstract class CacheableData extends ViewableData{
 
         return $message;
     }
+    function debug_simple(){die('here');
+        $message = "<h5>cacheable data: ".get_class($this)."</h5><ul>";
+        $message .= "<il>ID: ".$this->ID.". Title: ".$this->Title.". ClassName".$this->ClassName."</il>";
+        $message .= "</ul>";
+        return $message;
+    }
 }
