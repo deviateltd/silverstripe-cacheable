@@ -26,9 +26,9 @@ class Cacheable extends SiteTreeExtension{
             if(!$_cached_navigation->get_completed()) {
                 $service->refreshCachedConfig();
                 if(class_exists('Subsite')){
-                    $pages = DataObject::get("SiteTree", "\"SubsiteID\" = '".$siteConfig->SubsiteID."'");
+                    $pages = DataObject::get("Page", "\"SubsiteID\" = '".$siteConfig->SubsiteID."'");
                 }else{
-                    $pages = DataObject::get("SiteTree");
+                    $pages = DataObject::get("Page");
                 }
                 if($pages->exists()){
                     foreach($pages as $page){

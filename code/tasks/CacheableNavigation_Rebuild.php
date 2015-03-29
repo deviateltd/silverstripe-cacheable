@@ -30,9 +30,9 @@ class CacheableNavigation_Rebuild extends BuildTask{
                 $service = new CacheableNavigationService($mode, $config);
                 $service->refreshCachedConfig();
                 if(class_exists('Subsite')){
-                    $pages = DataObject::get("SiteTree", "\"SubsiteID\" = '".$config->SubsiteID."'");
+                    $pages = DataObject::get("Page", "\"SubsiteID\" = '".$config->SubsiteID."'");
                 }else{
-                    $pages = DataObject::get("SiteTree");
+                    $pages = DataObject::get("Page");
                 }
                 if($pages->exists()){
                     foreach($pages as $page){
