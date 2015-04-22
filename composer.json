@@ -1,20 +1,28 @@
 {
-  "name": "silverstripe/cacheable-navigation",
-  "description": "SilverStripe page and page navigation cacheable",
-  "type": "silverstripe-module",
-  "keywords": ["silverstripe", "navigation", "cached", "cacheable"],
-  "authors": [
-    {
-      "name": "Normann Lou",
-      "email": "normann.lou@deviate.net.nz"
-    }
-  ],
-  "require": {
-    "silverstripe/framework": ">=3.1",
-    "silverstripe/cms": ">=3.1"
-  },
-  "suggest": {
-    "silverstripe/queuedjobs": "Adds a queued job for refreshing page cache and cached navigation object"
-  },
-  "minimum-stability": "dev"
+    "name": "deviate/silverstripe-cacheable",
+    "description": "SilverStripe page and object caching",
+    "type": "silverstripe-module",
+    "keywords": ["silverstripe", "cache", "caching", "cacheable"],
+    "authors": [
+        {
+            "name": "Normann Lou",
+            "email": "normann.lou@deviate.net.nz"
+        },
+        {
+            "name": "Michael Watson",
+            "email": "michael.watson@deviate.net.nz"
+        },
+        {
+            "name": "Mikael.Mrozik",
+            "email": "mikael.mroznik@deviate.net.nz"
+        }
+    ],
+    "require": {
+        "silverstripe/framework": ">=3.1",
+        "silverstripe/cms": ">=3.1"
+    },
+    "suggest": {
+        "silverstripe/queuedjobs": "Adds a queued job for refreshing page cache and cached objects."
+    },
+    "minimum-stability": "dev"
 }
