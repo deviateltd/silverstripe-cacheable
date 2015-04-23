@@ -11,12 +11,12 @@ memcached Zend backends `code/_config.php`.
   1) Git Clone
 
 
-    #> git clone https://github.com/deviate/silverstripe-cacheable.git
+    #> git clone https://github.com/deviateltd/silverstripe-cacheable.git
 
   2) Composer command
 
 
-    composer require deviate/silverstripe-cacheable dev-master
+    composer require deviateltd/silverstripe-cacheable dev-master
 
   3) Composer (Manual)
 
@@ -25,14 +25,14 @@ Edit your project's `composer.json` as follows:
 Add a new line under the "require" block:
 
 
-    deviate/silverstripe-cacheable
+    deviateltd/silverstripe-cacheable
 
 Add a new block under the "repositories" block:
 
 
       {
        "type": "vcs",
-       "url": "https://github.com/deviate/silverstripe-cacheable.git"
+       "url": "https://github.com/deviateltd/silverstripe-cacheable.git"
       }
 
 Insert the `Cacheable` extension into your project's config.yml file so that it extends SiteTree:
