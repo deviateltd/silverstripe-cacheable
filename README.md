@@ -1,12 +1,10 @@
 # SilverStripe Cacheable
 
-[![License](https://poser.pugx.org/deviateltd/silverstripe-cacheable/license.svg)](https://github.com/deviateltd/silverstripe-cacheable/LICENCE)
-
 Cachable was originally designed to cache navigation hierarchies as objects to improve
-site performance, but has since be re-written to allow any object to be cached.
+site performance, but has since been re-written to allow any object to be cached.
 
 At its core is `Zend_Cache` and as such the module can use either the memcache or
-memcached Zend backends (See [code/_config.php](code/_config.php)).
+memcached Zend backends `code/_config.php`.
 
 ## Installation
 
@@ -52,4 +50,4 @@ A cache is built after running the `CacheableNavigation_Rebuild` task. This shou
 setup to run as a crontask on your server(s).
 
 Cache's are also selectively re-built when objects are published via the CMS. See the
-various `onAfterXX()` methods in [code/extensions/Cacheable.php](code/extensions/Cacheable.php).
+various `onAfterXX()` methods in `code/extensions/Cacheable.php`.
