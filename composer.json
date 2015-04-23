@@ -1,5 +1,5 @@
 {
-    "name": "deviate/silverstripe-cacheable",
+    "name": "deviateltd/silverstripe-cacheable",
     "description": "SilverStripe page and object caching",
     "type": "silverstripe-module",
     "keywords": ["silverstripe", "cache", "caching", "cacheable"],
