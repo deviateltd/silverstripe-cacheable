@@ -35,13 +35,6 @@ Add a new block under the "repositories" block:
        "url": "https://github.com/deviateltd/silverstripe-cacheable.git"
       }
 
-Insert the `Cacheable` extension into your project's config.yml file so that it extends SiteTree:
-
-
-    SiteTree:
-      extensions:
-        - Cacheable
-
 Now run `dev/build` via the browser or command line - and don't forget to flush.
 
 ## Usage
