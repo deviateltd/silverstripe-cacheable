@@ -1,29 +1,34 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: normann.lou
- * Date: 15/03/2015
- * Time: 6:57 PM
+ * 
+ * @author Deviate Ltd 2015 http://www.deviate.net.nz
+ * @package silverstripe-cachable
  */
-
-abstract class CacheableData extends ViewableData{
+abstract class CacheableData extends ViewableData {
     private static $cacheable_fields = array(
         "ID",
         "Title"
     );
 
+    /**
+     *
+     * @var array
+     */
     private static $cacheable_functions = array();
 
-
-    public function get_cacheable_fields(){
+    public function get_cacheable_fields() {
         return $this->config()->cacheable_fields;
     }
 
-    public function get_cacheable_functions(){
+    public function get_cacheable_functions() {
         return $this->config()->cacheable_functions;
     }
 
-    public function CachedNavigation(){
+    /**
+     * 
+     * @return array
+     */
+    public function CachedNavigation() {
         return Config::inst()->get('Cacheable', '_cached_navigation');
     }
 
@@ -52,20 +57,20 @@ abstract class CacheableData extends ViewableData{
         return null;
     }
 
-    public function NonCachedData(){
+    public function NonCachedData() {
         return DataObject::get_by_id($this->ClassName, $this->ID);
     }
 
-    function debug() {
+    public function debug() {
         $message = "<h3>cacheable data: ".get_class($this)."</h3>\n<ul>\n";
         $message .= "\t<li>Cached Fields:\n<ul>\n";
-        foreach($this->get_cacheable_fields() as $field){
+        foreach($this->get_cacheable_fields() as $field) {
             $message .= "\t<li>$field: ". $this->$field . "</li>\n";
         }
         $message .= "</ul>\n". "</li>\n";
 
         $message .= "\t<li>Cached Functions:\n<ul>\n";
-        foreach($this->get_cacheable_functions() as $function){
+        foreach($this->get_cacheable_functions() as $function) {
             $message .= "\t<li>$function: ". $this->$function . "</li>\n";
         }
         $message .= "</ul>\n". "</li>\n";
@@ -73,7 +78,8 @@ abstract class CacheableData extends ViewableData{
 
         return $message;
     }
-    function debug_simple(){
+    
+    public function debug_simple() {
         $message = "<h5>cacheable data: ".get_class($this)."</h5><ul>";
         $message .= "<il>ID: ".$this->ID.". Title: ".$this->Title.". ClassName".$this->ClassName."</il>";
         $message .= "</ul>";
