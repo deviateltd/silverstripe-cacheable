@@ -1,15 +1,32 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: normann.lou
- * Date: 16/03/2015
- * Time: 2:22 AM
+ * 
+ * Gives {@link SiteTree} objects caching abilities.
+ * 
+ * @author Deviate Ltd 2015 http://www.deviate.net.nz
+ * @package silverstripe-cachable
  */
-
-class Cacheable extends SiteTreeExtension{
+class Cacheable extends SiteTreeExtension {
+    
+    /**
+     *
+     * @var mixed
+     */
     public static $_cached_navigation;
 
-    public function contentControllerInit($controller){
+    /**
+     * 
+     * Initialises a pre-built cache (via {@link CacheableNavigation_Rebuild})
+     * used by front-end calling logic e.g. via $CachedData blocks in .ss templates.
+     * 
+     * Called using SilverStripe's extend() method in {@link ContentController}.
+     * 
+     * @param Controller $controller
+     * @return void
+     * @see {@link CacheableNavigation_Rebuild}.
+     * @see {@link CacheableNavigation_Clean}.
+     */
+    public function contentControllerInit($controller) {
         $service = new CacheableNavigationService();
         $currentStage = Versioned::current_stage();
         $stage_mode_mapping = array(
@@ -22,16 +39,17 @@ class Cacheable extends SiteTreeExtension{
             $siteConfig = $this->owner->getSiteConfig();
         }
         $service->set_config($siteConfig);
-        if($_cached_navigation = $service->getCacheableFrontEnd()->load($service->getIdentifier())){
+        
+        if($_cached_navigation = $service->getCacheableFrontEnd()->load($service->getIdentifier())) {
             if(!$_cached_navigation->get_completed()) {
                 $service->refreshCachedConfig();
-                if(class_exists('Subsite')){
+                if(class_exists('Subsite')) {
                     $pages = DataObject::get("Page", "\"SubsiteID\" = '".$siteConfig->SubsiteID."'");
                 }else{
                     $pages = DataObject::get("Page");
                 }
-                if($pages->exists()){
-                    foreach($pages as $page){
+                if($pages->exists()) {
+                    foreach($pages as $page) {
                         $service->set_model($page);
                         $service->refreshCachedPage();
                     }
@@ -73,24 +91,28 @@ class Cacheable extends SiteTreeExtension{
         ));
     }
 
-    public function refreshPageCache($modes){
+    /**
+     * 
+     * @param array $modes
+     */
+    public function refreshPageCache($modes) {
         //get the unlocked cached Navigation first
         $siteConfig = $this->owner->getSiteConfig();
         if(!$siteConfig->exists()) {
             $siteConfig = SiteConfig::current_site_config();
         }
-        foreach($modes as $stage => $mode){
+        foreach($modes as $stage => $mode) {
             $service = new CacheableNavigationService($mode, $siteConfig);
             $cache_frontend = $service->getCacheableFrontEnd();
             $id = $service->getIdentifier();
             $cached = $cache_frontend->load($id);
-            if($cached){
+            if($cached) {
                 $cached_site_config = $cached->get_site_config();
                 if(!$cached_site_config) {
                     $service->refreshCachedConfig();
                 }
                 $versioned = Versioned::get_one_by_stage(get_class($this->owner), $stage, "\"SiteTree\".\"ID\" = '".$this->owner->ID."'");
-                if($versioned){
+                if($versioned) {
                     $service->set_model($versioned);
                     $service->refreshCachedPage();
                 }
@@ -98,18 +120,18 @@ class Cacheable extends SiteTreeExtension{
         }
     }
 
-    public function removePageCache($modes){
+    public function removePageCache($modes) {
         //get the unlocked cached Navigation first
         $siteConfig = $this->owner->getSiteConfig();
         if(!$siteConfig->exists()) {
             $siteConfig = SiteConfig::current_site_config();
         }
-        foreach($modes as $stage => $mode){
+        foreach($modes as $stage => $mode) {
             $service = new CacheableNavigationService($mode, $siteConfig, $this->owner);
             $cache_frontend = $service->getCacheableFrontEnd();
             $id = $service->getIdentifier();
             $cached = $cache_frontend->load($id);
-            if($cached){
+            if($cached) {
                 $cached_site_config = $cached->get_site_config();
                 if(!$cached_site_config) {
                     $service->refreshCachedConfig();
@@ -119,7 +141,7 @@ class Cacheable extends SiteTreeExtension{
         }
     }
 
-    public function CachedNavigation(){
+    public function CachedNavigation() {
         $cachednavoff = isset($_REQUEST['cachednav'])&& $_REQUEST['cachednav']=='off'&&Director::isDev();
 
         if(!$cachednavoff && $this->owner->exists()) {
@@ -133,12 +155,12 @@ class Cacheable extends SiteTreeExtension{
         return new ContentController($this->owner);
     }
 
-    public function CachedData(){
+    public function CachedData() {
         $cachednavoff = isset($_REQUEST['cachednav'])&& $_REQUEST['cachednav']=='off'&&Director::isDev();
 
-        if(!$cachednavoff && $this->owner->exists()){
+        if(!$cachednavoff && $this->owner->exists()) {
             if ($cachedNavigiation = Config::inst()->get('Cacheable', '_cached_navigation')) {
-                if($cachedNavigiation->isUnlocked() && $cachedNavigiation->get_completed()){
+                if($cachedNavigiation->isUnlocked() && $cachedNavigiation->get_completed()) {
                     $site_map = $cachedNavigiation->get_site_map();
                     return $site_map[$this->owner->ID];
                 }
@@ -150,18 +172,18 @@ class Cacheable extends SiteTreeExtension{
 
 
     public $start_time;
-    function StartTime(){
+	public function StartTime() {
         $this->start_time = time();
         return '<br />starting at '.$this->start_time."<br />";
     }
 
     public $end_time;
-    function EndTime() {
+	public function EndTime() {
         $this->end_time = time();
         return '<br />ending at '.$this->end_time."<br />";
     }
 
-    function TimeConsumed(){
+	public function TimeConsumed() {
         return '<br />time consumed: '.((int)$this->end_time-(int)$this->start_time)."<br />";
     }
 }

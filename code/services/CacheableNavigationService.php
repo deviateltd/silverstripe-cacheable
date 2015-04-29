@@ -1,53 +1,66 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: normann.lou
- * Date: 15/03/2015
- * Time: 6:38 PM
+ * 
+ * @author Deviate Ltd 2015 http://www.deviate.net.nz
+ * @package silverstripe-cachable
+ * @todo Instantiate services using the {@link Injector} style.
  */
-
-class CacheableNavigationService{
+class CacheableNavigationService {
+    
     protected $config;
     protected $model;
     protected $mode;
+    private $_cacheable_frontend;
 
-    function CacheableNavigationService($mode=null, $config=null, $model=null){
+    /**
+     * 
+     * @param string $mode e.g. 'live'
+     * @param SiteConfig $config
+     * @param DataObject $model
+     */
+	public function __construct($mode=null, $config=null, $model=null) {
         if($mode) $this->mode = $mode;
         if($config) $this->config = $config;
         if($model) $this->model = $model;
     }
 
-    function set_mode($mode){
+	public function set_mode($mode) {
         $this->mode = $mode;
     }
 
-    function get_mode(){
+	public function get_mode() {
         return $this->mode;
     }
 
-    function set_config(SiteConfig $config){
+	public function set_config(SiteConfig $config) {
         $this->config = $config;
     }
 
-    function get_config(){
+	public function get_config() {
         return $this->config;
     }
 
-    function set_model(DataObject $model){
+	public function set_model(DataObject $model) {
         $this->model = $model;
     }
 
-    function get_model(){
+	public function get_model() {
         return $this->model;
     }
 
-    public function getIdentifier(){
+    public function getIdentifier() {
         return $this->get_mode()."Site".$this->get_config()->ID;
     }
-
-    private $_cacheable_frontend;
-    public function getCacheableFrontEnd(){
-        if(!$this->_cacheable_frontend){
+    
+    /**
+     * 
+     * Creates an instance of {@link Zend_Cache_Frontend_Class} and saves a 
+     * data-structure to it which is the cached object.
+     * 
+     * @return type
+     */
+    public function getCacheableFrontEnd() {
+        if(!$this->_cacheable_frontend) {
             $for = "CacheableNavigation";
             $cache = SS_Cache::factory($for, 'Class',
                 array(
@@ -57,7 +70,7 @@ class CacheableNavigationService{
                 )
             );
             $id = $this->getIdentifier();
-            if(!$cached = $cache->load($id)){
+            if(!$cached = $cache->load($id)) {
                 $entity = new CachedNavigation();
                 $this->_cacheable_frontend = SS_Cache::factory($for, 'Class',
                     array(
@@ -80,7 +93,7 @@ class CacheableNavigationService{
         return $this->_cacheable_frontend;
     }
 
-    public function refreshCachedConfig(){
+    public function refreshCachedConfig() {
         $cacheable = CacheableDataModelConvert::model2cacheable($this->get_config());
         // manipulating the CachedNavigation for its cached SiteConfig
         $cache_frontend = $this->getCacheableFrontEnd();
@@ -91,7 +104,7 @@ class CacheableNavigationService{
         $cache_frontend->save($cached, $id);
     }
 
-    public function removeCachedPage(){
+    public function removeCachedPage() {
         $cache_frontend = $this->getCacheableFrontEnd();
         $id = $this->getIdentifier();
         $cached = $cache_frontend->load($id);
@@ -102,19 +115,19 @@ class CacheableNavigationService{
             unset($root_elements[$model->ID]);
             $cached->set_root_elements($root_elements);
         }
-        if(isset($site_map[$model->ID])){
+        if(isset($site_map[$model->ID])) {
             $parentCached = $site_map[$model->ID]->getParent();
-            if($parentCached && $parentCached->ID && isset($site_map[$parentCached->ID])){
+            if($parentCached && $parentCached->ID && isset($site_map[$parentCached->ID])) {
                 $site_map[$parentCached->ID]->removeChild($model->ID);
             }
         }
         
-        if($model->ParentID){
-            if(isset($site_map[$model->ParentID])){
+        if($model->ParentID) {
+            if(isset($site_map[$model->ParentID])) {
                 $site_map[$model->ParentID]->removeChild($model->ID);
             }
         }
-        if(isset($site_map[$model->ID])){
+        if(isset($site_map[$model->ID])) {
             unset($site_map[$model->ID]);
         }
         $cached->set_site_map($site_map);
@@ -122,13 +135,13 @@ class CacheableNavigationService{
         $cache_frontend->save($cached, $id);
     }
 
-    public function refreshCachedPage(){
+    public function refreshCachedPage() {
         $model = $this->get_model();
 
         $cacheableClass = 'CacheableSiteTree';
         $classes = array_reverse(ClassInfo::ancestry(get_class($model)));
-        foreach($classes as $class){
-            if(class_exists($cachedDataClass = 'Cacheable'.$class)){
+        foreach($classes as $class) {
+            if(class_exists($cachedDataClass = 'Cacheable'.$class)) {
                 $cacheableClass = $cachedDataClass;
                 break;
             }
@@ -139,14 +152,14 @@ class CacheableNavigationService{
         $id = $this->getIdentifier();
         $cached = $cache_frontend->load($id);
         $site_map = $cached->get_site_map();
-        if(isset($site_map[$cacheable->ID])){
+        if(isset($site_map[$cacheable->ID])) {
             $parentCached = $site_map[$cacheable->ID]->getParent();
-            if($parentCached && $parentCached->ID && isset($site_map[$parentCached->ID])){
+            if($parentCached && $parentCached->ID && isset($site_map[$parentCached->ID])) {
                 $site_map[$parentCached->ID]->removeChild($cacheable->ID);
             }
             $children = $site_map[$cacheable->ID]->getAllChildren();
-            if(count($children)){
-                foreach($children as $child){
+            if(count($children)) {
+                foreach($children as $child) {
                     $cacheable->addChild($child);
                     $child->setParent($cacheable);
                 }
@@ -155,8 +168,8 @@ class CacheableNavigationService{
         }
 
         $root_elements = $cached->get_root_elements();
-        if($cacheable->ParentID){
-            if(!isset($site_map[$cacheable->ParentID])){
+        if($cacheable->ParentID) {
+            if(!isset($site_map[$cacheable->ParentID])) {
                 $parent = new CacheableSiteTree();
                 $parent->ID = $cacheable->ParentID;
                 $parent->addChild($cacheable);
@@ -178,7 +191,14 @@ class CacheableNavigationService{
         $cache_frontend->save($cached, $id);
     }
 
-    public function completeBuild(){
+    /**
+     * 
+     * Tell the cache frontend that construction of the cache for the given identifier, 
+     * is complete, and save this status back to the cache.
+     * 
+     * @return void
+     */
+    public function completeBuild() {
         $cache =  $this->getCacheableFrontEnd();
         $id = $this->getIdentifier();
         $cached = $cache->load($id);

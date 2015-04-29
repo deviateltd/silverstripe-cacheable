@@ -1,17 +1,33 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: normann.lou
- * Date: 15/03/2015
- * Time: 6:28 PM
+ * 
+ * This BuildTask clears the f/s or in-memory cache for {@link SiteTree} and 
+ * {@link SiteConfig} native SilverStripe objects. 
+ * The BuildTsask should be run from the command-line as the webserver user 
+ * e.g. www-data ala:
+ * 
+ * <code>
+ *  #> sudo -u www-data ./framework/sake dev/tasks/CacheableNavigation_Clean
+ * <code> 
+ * 
+ * @author Deviate Ltd 2015 http://www.deviate.net.nz
+ * @package silverstripe-cachable
+ * @see {@link CacheableNavigation_Rebuild}.
+ * @todo Rename task to better suit the module's new name
  */
+class CacheableNavigation_Clean extends BuildTask {
+    
+    /**
+     *
+     * @var string
+     */
+    protected $description = 'Clears silverstripe-cacheable object cache.';
 
-class CacheableNavigation_Clean extends BuildTask
-{
-    protected $description = 'clean storage completely, which is labeled as "cacheablestore"';
-
-    public function run($request)
-    {
+    /**
+     * 
+     * @param SS_HTTPRequest $request
+     */
+    public function run($request) {
         SS_Cache::pick_backend('cacheablestore', 'Cached_Navigation', 15);
         SS_Cache::factory('cacheablestore')->clean('all');
         $line_break = Director::is_cli()?"\n":"<br />";

@@ -1,10 +1,20 @@
 <?php
 /**
  * 
- * This BuildTask pre-primes the object cache.
+ * This BuildTask pre-primes the f/s or in-memory cache for {@link SiteTree} and 
+ * {@link SiteConfig} native SilverStripe objects. 
+ * The BuildTsask should be run from the command-line as the webserver user 
+ * e.g. www-data otherwise accessing the site from a browser, the webserver won't
+ * have permission to access the cache. E.g:
+ * 
+ * <code>
+ *  #> sudo -u www-data ./framework/sake dev/tasks/CacheableNavigation_Rebuild
+ * <code> 
  * 
  * @author Deviate Ltd 2015 http://www.deviate.net.nz
  * @package silverstripe-cachable
+ * @see {@link CacheableNavigation_Clean}.
+ * @todo Rename task to better suit the module's new name
  */
 class CacheableNavigation_Rebuild extends BuildTask {
     
@@ -12,7 +22,7 @@ class CacheableNavigation_Rebuild extends BuildTask {
      *
      * @var string
      */
-    protected $description = 'rebuild storage of the cacheable navigation';
+    protected $description = 'Rebuilds silverstripe-cacheable object cache.';
 
     /**
      * 
