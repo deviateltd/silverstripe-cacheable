@@ -2,14 +2,20 @@
 /**
  * 
  * This BuildTask pre-primes the f/s or in-memory cache for {@link SiteTree} and 
- * {@link SiteConfig} native SilverStripe objects. 
+ * {@link SiteConfig} native SilverStripe objects.
+ * 
  * The BuildTsask should be run from the command-line as the webserver user 
- * e.g. www-data otherwise accessing the site from a browser, the webserver won't
- * have permission to access the cache. E.g:
+ * e.g. www-data otherwise while attempting to access the site from a browser, the 
+ * webserver won't have permission to access the cache. E.g:
  * 
  * <code>
  *  #> sudo -u www-data ./framework/sake dev/tasks/CacheableNavigation_Rebuild
- * <code> 
+ * <code>
+ * 
+ * You may also pass-in an optional "Mode" parameter, one of "Live" or "Stage"
+ * which helps when debugging. It will restrict the cache-rebuild to objects in 
+ * the given {@Link Versioned} mode. The default is to cache objects in both 
+ * "Stage" and "Live" modes.
  * 
  * @author Deviate Ltd 2015 http://www.deviate.net.nz
  * @package silverstripe-cachable
@@ -33,10 +39,18 @@ class CacheableNavigation_Rebuild extends BuildTask {
         $line_break = Director::is_cli() ? PHP_EOL : "<br />";
 
         $currentStage = Versioned::current_stage();
-        $stage_mode_mapping = array(
-            "Stage" => "stage",
-            "Live"  => "live",
-        );
+        
+        // Restrict cache rebuild to the given mode
+        if($mode = $request->getVar('Mode')) {
+            $stage_mode_mapping = array(
+                ucfirst($mode) => strtolower($mode)
+            );
+        } else {
+            $stage_mode_mapping = array(
+                "Stage" => "stage",
+                "Live"  => "live",
+            );
+        }
 
         foreach($stage_mode_mapping as $stage => $mode){
             Versioned::set_reading_mode('Stage.'.$stage);
