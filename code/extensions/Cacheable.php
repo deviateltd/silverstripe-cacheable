@@ -27,6 +27,8 @@ class Cacheable extends SiteTreeExtension {
      * @see {@link CacheableNavigation_Clean}.
      */
     public function contentControllerInit($controller) {
+        // Skip if flushing or the project instructs us to do so
+        $skip = (self::is_flush($controller) || !self::build_cache_onload());
         $service = new CacheableNavigationService();
         $currentStage = Versioned::current_stage();
         $stage_mode_mapping = array(
@@ -39,9 +41,9 @@ class Cacheable extends SiteTreeExtension {
             $siteConfig = $this->owner->getSiteConfig();
         }
         $service->set_config($siteConfig);
-        
+
         if($_cached_navigation = $service->getCacheableFrontEnd()->load($service->getIdentifier())) {
-            if(!$_cached_navigation->get_completed()) {
+            if(!$skip && !$_cached_navigation->get_completed()) {
                 $service->refreshCachedConfig();
                 if(class_exists('Subsite')) {
                     $pages = DataObject::get("Page", "\"SubsiteID\" = '".$siteConfig->SubsiteID."'");
@@ -186,4 +188,195 @@ class Cacheable extends SiteTreeExtension {
 	public function TimeConsumed() {
         return '<br />time consumed: '.((int)$this->end_time-(int)$this->start_time)."<br />";
     }
+    
+    /**
+     * 
+     * Detect if a flush operation is happening.
+     * 
+     * @param Controller $controller
+     * @return boolean
+     * @todo add tests
+     */
+    public static function is_flush(Controller $controller) {
+        $getVars = $controller->getRequest()->getVars();
+        return (stristr(implode(',', array_keys($getVars)), 'flush') !== false);
+    }
+    
+    /**
+     * 
+     * Current module default is to build the cache if it's not present via
+     * a browser request after the "first user pays" pattern. This may not be 
+     * desirable on sites with 1000s of page objects.
+     * 
+     * @return boolean
+     * @todo Add tests
+     */
+    public static function build_cache_onload() {
+        return (bool) Config::inst()->get('CacheableConfig', 'build_cache_onload');
+    }
+}
+
+/**
+ * 
+ * @author Deviate Ltd 2015 http://www.deviate.net.nz
+ * @package silverstripe-cachable
+ * @todo Add unit tests to ensure exceptions are thrown in correct circumstances
+ * @todo Ditto to ensure YML config overrides work A-OK for cache_mode and server_opts
+ */
+class CacheableConfig {
+    
+    /**
+     * 
+     * @var string
+     */
+    private static $default_mode = 'memcached';
+    
+    /**
+     * 
+     * Get us the current caching mode. Useful for debugging
+     * 
+     * @var string
+     */
+    protected static $current_mode = '';
+   
+    /**
+     * 
+     * @return boolean True if Memcached extension is loaded
+     */
+    public static function configure_memcached() {
+        $defaultOpts = array(
+            'host' => 'localhost',
+            'port' => 11211,
+            'weight' => 1,
+        );
+        
+        if(extension_loaded('memcached')) {
+            // Use project-specific overridden opts, or the defaults
+            $projectOpts = Config::inst()->get('CacheableConfig', 'server_opts');
+            $serverOpts = ($projectOpts && !empty($projectOpts['memcached'])) ? $projectOpts['memcached'] : $defaultOpts;
+            
+            // Libmemcached is enabled.
+            SS_Cache::add_backend(
+                CACHEABLE_STORE_NAME,
+                'Libmemcached',
+                array('servers' => $serverOpts)
+            );
+            
+            self::$current_mode = 'memcached';
+            
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * 
+     * @return boolean if True Memcache extension is loaded
+     */
+    public static function configure_memcache() {
+        $defaultOpts = array(
+            'host' => 'localhost',
+            'port' => 11211,
+            'persistent' => true,
+            'weight' => 1,
+            'timeout' => 5,
+            'retry_interval' => 15,
+            'status' => true,
+            'failure_callback' => ''
+        );
+        
+        if(class_exists('Memcache')) {
+            // Use project-specific overridden opts, or the defaults
+            $projectOpts = Config::inst()->get('CacheableConfig', 'server_opts');
+            $serverOpts = ($projectOpts && !empty($projectOpts['memcache'])) ? $projectOpts['memcache'] : $defaultOpts;
+            
+            // Memcached is enabled.
+            SS_Cache::add_backend(
+                CACHEABLE_STORE_NAME,
+                'Memcached',
+                array('servers' => $serverOpts)
+            );
+            
+            self::$current_mode = 'memcache';
+            
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * 
+     * @return boolean True if the filesystem is available to be used for caching.
+     * @todo verify the cache store is actually cleared/built on the F/S
+     */
+    public static function configure_fs() {
+        $cacheable_store_dir = CACHEABLE_STORE_DIR;
+        if(!is_dir($cacheable_store_dir)) {
+            mkdir($cacheable_store_dir);
+        }
+        
+        $storeIsOk = (
+            file_exists($cacheable_store_dir) &&
+            is_writable($cacheable_store_dir)
+        );
+        if(!$storeIsOk) {
+            return false;
+        }
+
+        SS_Cache::add_backend(CACHEABLE_STORE_NAME, 'File', array(
+            'cache_dir' => $cacheable_store_dir,
+        ));
+        
+        self::$current_mode = 'fs';
+        
+        return true;
+    }
+    
+    /**
+     * 
+     * @throws CacheableException
+     * @return void
+     */
+    public static function configure() {
+        // Project-specific YML config trumps anything in module's _config.php
+        if(!$mode = Config::inst()->get('CacheableConfig', 'cache_mode')) {
+            $mode = self::$default_mode;
+        }
+        
+        $confMethodName = 'configure_' . $mode;
+        if(!method_exists(get_class(), $confMethodName)) {
+            throw new CacheableException('The configured cache mode: "$mode" doesn\'t exist.');
+        }
+        
+        // Default to F/S if one of the modes isn't playing ball
+        if(!self::$confMethodName()) {
+            if(!self::configure_fs()) {
+                throw new CacheableException('Unable to select a cache-mode. Giving up.');
+            }
+        }
+    }
+    
+    /**
+     * 
+     * Returns the current cache mode.
+     * 
+     * @return string
+     */
+    public static function current_cache_mode() {
+        return self::$current_mode;
+    }
+}
+
+/**
+ * 
+ * Custom exceptions allow module-specific exceptions to be easily tracked 
+ * when such tracking/alerting systems are utilised.
+ * 
+ * @author Deviate Ltd 2015 http://www.deviate.net.nz
+ * @package silverstripe-cachable
+ */
+class CacheableException extends Exception {
+    
 }

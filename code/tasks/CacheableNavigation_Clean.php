@@ -28,9 +28,9 @@ class CacheableNavigation_Clean extends BuildTask {
      * @param SS_HTTPRequest $request
      */
     public function run($request) {
-        SS_Cache::pick_backend('cacheablestore', 'Cached_Navigation', 15);
-        SS_Cache::factory('cacheablestore')->clean('all');
+        SS_Cache::pick_backend(CACHEABLE_STORE_NAME, 'Cached_Navigation', 15);
+        SS_Cache::factory(CACHEABLE_STORE_NAME)->clean('all');
         $line_break = Director::is_cli()?"\n":"<br />";
-        echo $line_break."cacheablestore cleaned".$line_break;
+        echo $line_break . CACHEABLE_STORE_NAME . " cleaned".$line_break;
     }
 }
