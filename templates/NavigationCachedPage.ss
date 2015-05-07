@@ -7,7 +7,7 @@
 <head>
     <% base_tag %>
 </head>
-<body itemscope itemtype="http://schema.org/WebPage" class="preload eeca">
+<body itemscope itemtype="http://schema.org/WebPage" class="preload">
     <div id="page-wrapper">
         <div id="page-wrapper-inner">
             <div id="main-page-area">
