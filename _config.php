@@ -1,49 +1,18 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: normann.lou
- * Date: 15/03/2015
- * Time: 6:24 PM
+ * 
+ * @author Deviate Ltd 2015 http://www.deviate.net.nz
+ * @package silverstripe-cachable
+ * 
+ * Configure the module's storage:
+ * 
+ * The default is to use memcached for the cache store, but this can be overriden in 
+ * project YML config. You can also optionally override the default "server" array 
+ * normally passed to {@link SS_Cache} and Zend_Cache. See the README.
  */
 
-if(extension_loaded('memcached')){
-    // Libmemcached is enabled.
-    SS_Cache::add_backend(
-        'cacheablestore',
-        'Libmemcached',
-        array(
-            'servers' => array(
-                'host' => 'localhost',
-                'port' => 11211,
-                'weight' => 1,
-            ),
-        )
-    );
-}else if(class_exists('Memcache')){
-    // Memcached is enabled.
-    SS_Cache::add_backend(
-        'cacheablestore',
-        'Memcached',
-        array(
-            'servers' => array(
-                'host' => 'localhost',
-                'port' => 11211,
-                'persistent' => true,
-                'weight' => 1,
-                'timeout' => 5,
-                'retry_interval' => 15,
-                'status' => true,
-                'failure_callback' => ''
-            )
-        )
-    );
-}else{
-    $cacheable_store_dir = TEMP_FOLDER . DIRECTORY_SEPARATOR . 'cacheable-navigation';
-    if (!is_dir($cacheable_store_dir)) mkdir($cacheable_store_dir);
+define('CACHEABLE_STORE_DIR', TEMP_FOLDER . DIRECTORY_SEPARATOR . 'cacheable-navigation');
+define('CACHEABLE_STORE_NAME', 'cacheablestore');
 
-    SS_Cache::add_backend('cacheablestore', 'File', array(
-        'cache_dir' => $cacheable_store_dir,
-    ));
-}
-
-SS_Cache::pick_backend('cacheablestore', 'Cached_Navigation', 15);
+CacheableConfig::configure();
+SS_Cache::pick_backend(CACHEABLE_STORE_NAME, 'Cached_Navigation', 15);
