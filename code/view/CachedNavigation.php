@@ -1,12 +1,10 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: normann.lou
- * Date: 15/03/2015
- * Time: 6:47 PM
+ * @author Deviate Ltd 2014-2015 http://www.deviate.net.nz
+ * @package silverstripe-cachable
  */
-
 class CachedNavigation extends ArrayList {
+    
     private $cached_site_config;
     private $site_map = array();
     private $root_elements = array();

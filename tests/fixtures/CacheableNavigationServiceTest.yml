@@ -1,0 +1,7 @@
+SiteTree:
+  test-page-1:
+    Title: 'This is a simple page to be cached'
+    Content: 'Cache me!'
+SiteConfig:
+  default:
+    Title: Default
