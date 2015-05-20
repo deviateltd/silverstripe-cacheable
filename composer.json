@@ -15,14 +15,16 @@
         {
             "name": "Mikael.Mrozik",
             "email": "mikael.mroznik@deviate.net.nz"
+        },
+        {
+            "name": "Russell Michell",
+            "email": "russell.michell@deviate.net.nz"
         }
     ],
     "require": {
         "silverstripe/framework": ">=3.1",
-        "silverstripe/cms": ">=3.1"
-    },
-    "suggest": {
-        "silverstripe/queuedjobs": "Adds a queued job for refreshing page cache and cached objects."
+        "silverstripe/cms": ">=3.1",
+        "silverstripe/queuedjobs": "2.3.1"
     },
     "minimum-stability": "dev"
 }
