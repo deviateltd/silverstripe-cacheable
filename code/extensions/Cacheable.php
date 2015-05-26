@@ -64,8 +64,9 @@ class Cacheable extends SiteTreeExtension {
                         $service->refreshCachedPage();
                     }
                 }
-                $service->completeBuildModel();
-                $service->completeBuildConfig();
+                //$service->completeBuildModel();
+                //$service->completeBuildConfig();
+                $service->completeBuild();
                 $_cached_navigation = $service->getCacheableFrontEnd()->load($service->getIdentifier());
 
             }
@@ -183,7 +184,12 @@ class Cacheable extends SiteTreeExtension {
      */
     public function CachedData() {
         if($this->owner->exists()) {
+
             if($cachedNavigiation = Config::inst()->get('Cacheable', '_cached_navigation')) {
+                
+//            var_dump($cachedNavigiation->debug());
+//            die;
+                
                 if($cachedNavigiation->isUnlocked() && $cachedNavigiation->get_completed()) {
                     $site_map = $cachedNavigiation->get_site_map();
                     if(!empty($site_map[$this->owner->ID])) {

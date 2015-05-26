@@ -200,17 +200,17 @@ class CacheableNavigationService {
         // manipulating the CachedNavigation for its cached SiteConfig
         $frontend = $this->getCacheableFrontEnd();
         $id = $this->getIdentifier();
-        if(!$this->getClassCacheForConfig()) {
+        //if(!$this->getClassCacheForConfig()) {
             if(!$cached = $frontend->load($id)) {
                 return false;
             }
-            $this->_cachedConfig = $cached;
-        }
+            //$this->_cachedConfig = $cached;
+        //}
         
-        $this->getClassCacheForConfig()->set_site_config($cacheable);
+        $cached->set_site_config($cacheable);
         $frontend->remove($id);
         
-        return $frontend->save($this->getClassCacheForConfig(), $id, array(self::get_default_cache_tag()));
+        return $frontend->save($cached, $id, array(self::get_default_cache_tag()));
     }
 
     /**
@@ -223,20 +223,20 @@ class CacheableNavigationService {
     public function removeCachedPage() {
         $frontend = $this->getCacheableFrontEnd();
         $id = $this->getIdentifier();
-        if(!$this->getClassCacheForModel()) {
+        //if(!$this->getClassCacheForModel()) {
             if(!$cached = $frontend->load($id)) {
                 return false;
             }
-            $this->_cachedModel = $cached;
-        }
+            //$this->_cachedModel = $cached;
+        //}
         
-        $site_map = $this->getClassCacheForModel()->get_site_map();
-        $root_elements = $this->getClassCacheForModel()->get_root_elements();
+        $site_map = $cached->get_site_map();
+        $root_elements = $cached->get_root_elements();
         $model = $this->get_model();
         if(isset($root_elements[$model->ID])) {
             // Remove the object from the sitemap
             unset($root_elements[$model->ID]);
-            $this->getClassCacheForModel()->set_root_elements($root_elements);
+            $cached->set_root_elements($root_elements);
         }
         
         if(isset($site_map[$model->ID])) {
@@ -256,11 +256,11 @@ class CacheableNavigationService {
             unset($site_map[$model->ID]);
         }
         
-        $this->getClassCacheForModel()->set_site_map($site_map);
+        $cached->set_site_map($site_map);
         $frontend->remove($id);
         
         return $frontend->save(
-                    $this->getClassCacheForModel(), 
+                    $cached, 
                     $id, 
                     array(self::get_default_cache_tag())
                 );
@@ -292,14 +292,14 @@ class CacheableNavigationService {
         $frontend = $this->getCacheableFrontEnd();
         $id = $this->getIdentifier();
         
-        if(!$this->getClassCacheForModel()) {
+        //if(!$this->getClassCacheForModel()) {
             if(!$cached = $frontend->load($id)) {
                 return false;
             }
-            $this->_cachedModel = $cached;
-        }
+            //$this->_cachedModel = $cached;
+        //}
 
-        $site_map = $this->getClassCacheForModel()->get_site_map();
+        $site_map = $cached->get_site_map();
         if(isset($site_map[$cacheable->ID])) {
             $parentCached = $site_map[$cacheable->ID]->getParent();
             if($parentCached && $parentCached->ID && isset($site_map[$parentCached->ID])) {
@@ -317,7 +317,7 @@ class CacheableNavigationService {
             unset($site_map[$cacheable->ID]);
         }
         
-        $root_elements = $this->getClassCacheForModel()->get_root_elements();
+        $root_elements = $cached->get_root_elements();
         if($cacheable->ParentID) {
             if(!isset($site_map[$cacheable->ParentID])) {
                 $parent = new CacheableSiteTree();
@@ -339,12 +339,12 @@ class CacheableNavigationService {
         }
         
         $site_map[$cacheable->ID] = $cacheable;
-        $this->getClassCacheForModel()->set_site_map($site_map);
-        $this->getClassCacheForModel()->set_root_elements($root_elements);
+        $cached->set_site_map($site_map);
+        $cached->set_root_elements($root_elements);
         $frontend->remove($id);
         
         return $frontend->save(
-                    $this->getClassCacheForModel(), 
+                    $cached, 
                     $id, 
                     array(self::get_default_cache_tag())
                 );
@@ -360,17 +360,43 @@ class CacheableNavigationService {
     public function completeBuildModel() {
         $frontend = $this->getCacheableFrontEnd();
         $id = $this->getIdentifier();
-        if(!$this->getClassCacheForModel()) {
+        //if(!$this->getClassCacheForModel()) {
             if(!$cached = $frontend->load($id)) {
                 return false;
             }
-            $this->_cachedModel = $cached;
-        }
+            //$this->_cachedModel = $cached;
+        //}
         
-        $this->getClassCacheForModel()->set_completed(true);
+        $cached->set_completed(true);
         
         return $frontend->save(
-                    $this->getClassCacheForModel(), 
+                    $cached, 
+                    $id, 
+                    array(self::get_default_cache_tag())
+                );
+    }
+    
+    /**
+     * 
+     * Tell the cache frontend that construction of the cache for the given identifier, 
+     * and model is complete, and save this status back to the cache.
+     * 
+     * @return boolean
+     */
+    public function completeBuild() {
+        $frontend = $this->getCacheableFrontEnd();
+        $id = $this->getIdentifier();
+        //if(!$this->getClassCacheForModel()) {
+            if(!$cached = $frontend->load($id)) {
+                return false;
+            }
+            //$this->_cachedModel = $cached;
+        //}
+        
+        $cached->set_completed(true);
+        
+        return $frontend->save(
+                    $cached, 
                     $id, 
                     array(self::get_default_cache_tag())
                 );
@@ -386,17 +412,17 @@ class CacheableNavigationService {
     public function completeBuildConfig() {
         $frontend = $this->getCacheableFrontEnd();
         $id = $this->getIdentifier();
-        if(!$this->getClassCacheForConfig()) {
+        //if(!$this->getClassCacheForConfig()) {
             if(!$cached = $frontend->load($id)) {
                 return false;
             }
-            $this->_cachedConfig = $cached;
-        }
+            //$this->_cachedConfig = $cached;
+        //}
         
-        $this->getClassCacheForConfig()->set_completed(true);
+        $cached->set_completed(true);
         
         return $frontend->save(
-                    $this->getClassCacheForConfig(), 
+                    $cached, 
                     $id, 
                     array(self::get_default_cache_tag())
                 );

@@ -139,8 +139,9 @@ class CacheableNavigation_Rebuild extends BuildTask {
                     }
                 }
                 
-                $service->completeBuildModel();
-                $service->completeBuildConfig();
+                //$service->completeBuildModel();
+                //$service->completeBuildConfig();
+                $service->completeBuild();
                 
                 // Completion message
                 $msg = self::new_line() . $pageCount . ' ' . $stage . ' pages in subsite ' . $config->ID;
