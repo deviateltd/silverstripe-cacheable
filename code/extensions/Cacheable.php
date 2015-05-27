@@ -64,8 +64,7 @@ class Cacheable extends SiteTreeExtension {
                         $service->refreshCachedPage();
                     }
                 }
-                $service->completeBuildModel();
-                $service->completeBuildConfig();
+                $service->completeBuild();
                 $_cached_navigation = $service->getCacheableFrontEnd()->load($service->getIdentifier());
 
             }

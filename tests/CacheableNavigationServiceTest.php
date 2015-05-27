@@ -36,14 +36,14 @@ class CacheableNavigationServiceTest extends SapphireTest {
         $service = new CacheableNavigationService('Live', $config, $model);
         
         // Cache should be empty
-        $this->assertNull($service->getClassCacheForModel());
+        $this->assertNull($service->_cached);
         
         // Populate the cache and re-test
         $this->assertTrue($service->refreshCachedPage());
-        $this->assertNotNull($service->getClassCacheForModel());
-        $this->assertInstanceOf('CachedNavigation', $service->getClassCacheForModel());
+        $this->assertNotNull($service->_cached);
+        $this->assertInstanceOf('CachedNavigation', $service->_cached);
         
-        $cachedObject = $service->getClassCacheForModel()->get_site_map();
+        $cachedObject = $service->_cached->get_site_map();
         $this->assertCount(1, $cachedObject);
         // Why is $cachedObject not zero-indexed?
         $this->assertInstanceOf('CacheableSiteTree', $cachedObject[1]);
@@ -58,14 +58,14 @@ class CacheableNavigationServiceTest extends SapphireTest {
         $service = new CacheableNavigationService('Live', null, $model);
         
         // Entire cache should be empty
-        $this->assertNull($service->getClassCacheForModel());
+        $this->assertNull($service->_cached);
         
         // Populate the cache and re-test
         $this->assertTrue($service->refreshCachedPage());
-        $this->assertNotNull($service->getClassCacheForModel());
-        $this->assertInstanceOf('CachedNavigation', $service->getClassCacheForModel());
+        $this->assertNotNull($service->_cached);
+        $this->assertInstanceOf('CachedNavigation', $service->_cached);
        
-        $cachedObject = $service->getClassCacheForModel()->get_site_map();
+        $cachedObject = $service->_cached->get_site_map();
         // Why is $cachedObject not zero-indexed?
         $this->assertCount(1, $cachedObject);
         $this->assertInstanceOf('CacheableSiteTree', $cachedObject[1]);
@@ -74,7 +74,7 @@ class CacheableNavigationServiceTest extends SapphireTest {
         $this->assertTrue($service->removeCachedPage());
         
         // Cache should be devoid of SiteTree-esque objects
-        $this->assertContainsOnlyInstancesOf('CacheableSiteConfig', $service->getClassCacheForModel());
+        $this->assertContainsOnlyInstancesOf('CacheableSiteConfig', $service->_cached);
     }
     
     /**
@@ -85,14 +85,14 @@ class CacheableNavigationServiceTest extends SapphireTest {
         $service = new CacheableNavigationService('Live', $config, null);
         
         // Cache should be empty
-        $this->assertNull($service->getClassCacheForConfig());
+        $this->assertNull($service->_cached);
         
         // Populate the cache and re-test
         $this->assertTrue($service->refreshCachedConfig());
-        $this->assertNotNull($service->getClassCacheForConfig());
-        $this->assertInstanceOf('CachedNavigation', $service->getClassCacheForConfig());
+        $this->assertNotNull($service->_cached);
+        $this->assertInstanceOf('CachedNavigation', $service->_cached);
        
-        $cachedObject = $service->getClassCacheForConfig()->get_site_config();
+        $cachedObject = $service->_cached->get_site_config();
         $this->assertInstanceOf('CacheableSiteConfig', $cachedObject);
         $this->assertEquals('Default', $cachedObject->Title);
     }
@@ -100,7 +100,7 @@ class CacheableNavigationServiceTest extends SapphireTest {
     /**
      * 
      */
-    public function testCompleteBuildModel() {
+    public function testCompleteBuild() {
         $model = $this->objFromFixture('SiteTree', 'test-page-1');
         $service = new CacheableNavigationService('Live', null, $model);
         
@@ -112,27 +112,7 @@ class CacheableNavigationServiceTest extends SapphireTest {
         $service->refreshCachedPage();
         
         // Set it to complete and re-test
-        $service->completeBuildModel();
-        $cachable = $service->getCacheableFrontEnd()->load($service->getIdentifier());
-        $this->assertTrue($cachable->get_completed());
-    }
-    
-    /**
-     * 
-     */
-    public function testCompleteBuildConfig() {
-        $config = $this->objFromFixture('SiteConfig', 'default');
-        $service = new CacheableNavigationService('Live', $config);
-        
-        // Cache should be empty
-        $cachable = $service->getCacheableFrontEnd()->load($service->getIdentifier());
-        $this->assertFalse($cachable->get_completed());
-        
-        // Populate the cache with some config
-        $service->refreshCachedConfig();
-        
-        // Set it to complete and re-test
-        $service->completeBuildConfig();
+        $service->completeBuild();
         $cachable = $service->getCacheableFrontEnd()->load($service->getIdentifier());
         $this->assertTrue($cachable->get_completed());
     }
