@@ -13,7 +13,7 @@
 
 // On CWP setups, allow the module as much RAM as it can offer
 // See: https://www.cwp.govt.nz/guides/technical-faq/php-configuration/
-if(defined(CWP_ENVIRONMENT)) {
+if(defined('CWP_ENVIRONMENT')) {
     ini_set('memory_limit', '256M');
 }
 
