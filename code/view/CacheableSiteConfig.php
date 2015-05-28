@@ -1,20 +1,31 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: normann.lou
- * Date: 15/03/2015
- * Time: 7:23 PM
+ * @author Deviate Ltd 2014-2015 http://www.deviate.net.nz
+ * @package silverstripe-cachable
  */
-
-class CacheableSiteConfig extends CacheableData{
+class CacheableSiteConfig extends CacheableData {
+    
+    /**
+     *
+     * @var array
+     */
     private static $cacheable_fields = array(
         "CanViewType",
     );
 
+    /**
+     *
+     * @var array
+     */
     private static $cacheable_functions = array(
         "ViewerGroups",
     );
 
+    /**
+     * 
+     * @param Member $member
+     * @return boolean
+     */
     public function canView($member = null) {
         if(!$member) $member = Member::currentUserID();
         if($member && is_numeric($member)) $member = DataObject::get_by_id('Member', $member);
