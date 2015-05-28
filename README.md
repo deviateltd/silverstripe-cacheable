@@ -2,10 +2,10 @@
 
 Cachable was originally designed to only cache navigation hierarchies as objects to improve
 site performance, but in future versions aims to allow an increased range of standard SilverStripe
-list objects to be casched.
+list objects to be cached.
 
 At its core is `Zend_Cache` and as such the module can use the Memcache, Memcached, APCu or File
-Zend backends, see: `code/_config.php`.
+Zend Backend cache's. See: `code/_config.php`.
 
 ## Installation
 
@@ -115,11 +115,12 @@ but there is some scope to override these in your project's YML config:
             port: 11212
             weight: 2
           client:
-            wibble
+            opt1: wibble
+            opt2: 'wibble wibble'
 
 By default the module will attempt to rebuild the cache if one doesn't exist, whenever
 a user hits the site. For sites with a large number of page objects, this probably isn't
-a good idea, so this can be overridden in config also:
+a good idea, so this should be overridden in config also:
 
     CacheableConfig:
     # Instruct Cacheable not to build a cache via the "first user pays" approach
@@ -131,6 +132,19 @@ The Rebuild task can be passed a `Versioned` stage "Stage" or "Live" which will 
 rebuilding the cache to just the passed stage, thus:
 
     #> sudo -u www-data ./framework/sake dev/tasks/CacheableNavigation_Rebuild Stage=Live
+
+By default only a minimal number of class properties and methods are cached. If your
+project makes use of additional properties/methods, simply modify your project's
+config.yml file. E.g. if you had a custom field and method defined in your Page class
+called "WibbleField" and "getWibble", you could instruct the module to cache them thus:
+
+    CacheableSiteTree:
+      cacheable_fields:
+        - WibbleField
+      cacheable_functions:
+        - getWibble
+
+Similarly you do the same for your custom site config, via `CacheableSiteConfig`.
 
 ## FAQ
 
