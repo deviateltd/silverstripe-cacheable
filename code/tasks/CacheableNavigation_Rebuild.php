@@ -232,6 +232,8 @@ class CacheableNavigation_Rebuild extends BuildTask {
      * @return number $jobDescriptorID (Return value not used)
      */
     public function queue(CachableNavigationService $service, $chunk, $stage, $subsiteID) {
+        // We only need to do this during queueing
+        $service->clearInternalCache();
         $job = new CachableChunkedRefreshJob($service, $chunk, $stage, $subsiteID);
         $jobDescriptorID = singleton('QueuedJobService')->queueJob($job);
         
