@@ -11,15 +11,9 @@
  * refreshing all objects in the same chunk of N 100s of pages, and consuming a ton 
  * of system resources.
  * 
- * Rough testing has yielded ~300Mb peak memory use on a 4GB RAM, non-SSD machine
- * with 500Mb allocated to PHP, on a v3.1 site with 700 identical pages, _without_
- * chunking, while _with_ chunking the entire task takes ~5s and registers ~75Mb
- * peak memory usage on the same system.
- * 
  * @author Deviate Ltd 2015 http://www.deviate.net.nz
  * @package silverstripe-cachable
  * @see {@link CacheableNavigation_Rebuild}.
- * todo The "Clean" ob may be clearing things it shouldn't be
  */
 class CachableChunkedRefreshJob extends AbstractQueuedJob implements QueuedJob {
     
@@ -84,8 +78,7 @@ class CachableChunkedRefreshJob extends AbstractQueuedJob implements QueuedJob {
                 )
             );
         $this->setCustomConfig($jobConfig);
-        
-        $this->totalSteps = 1;
+        $this->totalSteps = $this->chunkSize();
 	}
     
     /**
@@ -203,6 +196,7 @@ class CachableChunkedRefreshJob extends AbstractQueuedJob implements QueuedJob {
         $service = $jobConfig['CachableChunkedRefreshJobStorageService']['service'];
         $chunk = $jobConfig['CachableChunkedRefreshJobStorageService']['chunk'];
         
+        $i = 1;
         foreach($chunk as $object) {
             $service->set_model($object);
             
@@ -219,9 +213,10 @@ class CachableChunkedRefreshJob extends AbstractQueuedJob implements QueuedJob {
                 $errorMsg = 'Unable to cache object#' . $object->ID;
                 $this->addMessage($errorMsg);
             }
+            
+            $this->currentStep = $i++;
         }
         
-        $this->currentStep = 1;
         $this->isComplete = true;
     }
     

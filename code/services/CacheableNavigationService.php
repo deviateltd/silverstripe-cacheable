@@ -38,9 +38,9 @@ class CacheableNavigationService {
      * so we needn't re-call Zend_Cache_Core::load() and suffer exponential increases
      * in peak memory.
      * 
-     * @var Zend_Cache_Frontend_Class
+     * @var null|Zend_Cache_Frontend_Class
      */
-    public $_cached;
+    public $_cached = null;
 
     /**
      *
@@ -180,7 +180,11 @@ class CacheableNavigationService {
         $this->_cached->set_site_config($cacheable);
         $frontend->remove($id);
         
-        return $frontend->save($this->_cached, $id, array(self::get_default_cache_tag()));
+        return $frontend->save(
+                    $this->_cached, 
+                    $id, 
+                    array(self::get_default_cache_tag())
+                );
     }
 
     /**
@@ -354,5 +358,15 @@ class CacheableNavigationService {
      */
     private static function get_default_cache_tag() {
         return CacheableConfig::is_running_test() ? CACHEABLE_STORE_TAG_DEFAULT_TEST : CACHEABLE_STORE_TAG_DEFAULT;
+    }
+    
+    /**
+     * 
+     * Simply clears the internal class cache.
+     * 
+     * @return void
+     */
+    public function clearInternalCache() {
+        $this->_cached = null;
     }
 }
