@@ -369,4 +369,35 @@ class CacheableNavigationService {
     public function clearInternalCache() {
         $this->_cached = null;
     }
+    
+    /**
+     * 
+     * Core method to directly fetch the contents of the stored object-cache. You can utilise 
+     * this in custom / project-specific logic to iterate over and return {@link CacheableSiteTree}
+     * and {@link CacheableSiteConfig} objects instead of going to the database.
+     * 
+     * Example usage:
+     * 
+     * <code>
+     *  $mode = 'Live';
+     *  $conf = SiteConfig::current_site_config();
+     *  $cacheService = new CacheableNavigationService($mode, $conf);
+     *  $objectCache = $cacheService->getObjectCache();
+     *  $cachedSiteTree = ArrayList::create($cache->get_site_map());
+     *  $cachedSiteConfig = ArrayList::create($cache->get_site_config());
+     * <code>
+     * 
+     * @param Zend_Cached_Frontend_Class
+     * @param string $identifier
+     * @return boolean|CachedNavigation
+     */
+    public function getObjectCache($frontend = null, $identifier = null) {
+        $frontend = $frontend ? $frontend : $this->getCacheableFrontEnd();
+        $id = $identifier ? $identifier : $this->getIdentifier();
+        if(!$cached = $frontend->load($id)) {
+            return false;
+        }
+        
+        return $cached;
+    }
 }
