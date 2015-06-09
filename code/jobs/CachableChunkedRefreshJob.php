@@ -209,7 +209,7 @@ class CachableChunkedRefreshJob extends AbstractQueuedJob implements QueuedJob {
             
             // Only if refreshCachedPage() signals it completed A-OK and saved its payload
             // to the cachestore, do we then update the job status to 'complete'.
-            if(!$service->refreshCachedPage()) {
+            if(!$service->refreshCachedPage(true)) {
                 $errorMsg = 'Unable to cache object#' . $object->ID;
                 $this->addMessage($errorMsg);
             }

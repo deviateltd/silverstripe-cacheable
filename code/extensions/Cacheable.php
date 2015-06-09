@@ -61,7 +61,7 @@ class Cacheable extends SiteTreeExtension {
                 if($pages->exists()) {
                     foreach($pages as $page) {
                         $service->set_model($page);
-                        $service->refreshCachedPage();
+                        $service->refreshCachedPage(true);
                     }
                 }
                 $service->completeBuild();
@@ -76,38 +76,40 @@ class Cacheable extends SiteTreeExtension {
     public function onAfterWrite() {
         $this->refreshPageCache(array(
             'Stage' => 'stage',
-        ));
+        ), false);
     }
 
     public function onAfterPublish(&$original) {
         $this->refreshPageCache(array(
             'Live' => 'live',
-        ));
+        ), false);
     }
 
     public function onAfterUnpublish() {
         $this->removePageCache(array(
             'Live' => 'live',
-        ));
+        ), false);
     }
 
     public function onAfterDelete() {
         $this->removePageCache(array(
             'Stage' => 'stage',
             'Live' => 'live',
-        ));
+        ), false);
+        
         $this->refreshPageCache(array(
             'Stage' => 'stage',
             'Live' => 'live',
-        ));
+        ), false);
     }
 
     /**
      * 
      * @param array $modes
+     * @param boolean $forceRemoval Whether to unset() children in {@link CacheableSiteTree::removeChild()}.
      * @return void
      */
-    public function refreshPageCache($modes) {
+    public function refreshPageCache($modes, $forceRemoval = false) {
         //get the unlocked cached Navigation first
         $siteConfig = $this->owner->getSiteConfig();
         if(!$siteConfig->exists()) {
@@ -128,7 +130,7 @@ class Cacheable extends SiteTreeExtension {
                 $versioned = Versioned::get_one_by_stage(get_class($this->owner), $stage, "\"SiteTree\".\"ID\" = '".$this->owner->ID."'");
                 if($versioned) {
                     $service->set_model($versioned);
-                    $service->refreshCachedPage();
+                    $service->refreshCachedPage($forceRemoval);
                 }
             }
         }
@@ -137,9 +139,10 @@ class Cacheable extends SiteTreeExtension {
     /**
      * 
      * @param array $modes
+     * @param boolean $forceRemoval Whether to unset() children in {@link CacheableSiteTree::removeChild()}.
      * @return void
      */
-    public function removePageCache($modes) {
+    public function removePageCache($modes, $forceRemoval = true) {
         $siteConfig = $this->owner->getSiteConfig();
         if(!$siteConfig->exists()) {
             $siteConfig = SiteConfig::current_site_config();
@@ -155,7 +158,7 @@ class Cacheable extends SiteTreeExtension {
                 if(!$cached_site_config) {
                     $service->refreshCachedConfig();
                 }
-                $service->removeCachedPage();
+                $service->removeCachedPage($forceRemoval);
             }
         }
     }

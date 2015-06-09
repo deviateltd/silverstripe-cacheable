@@ -30,9 +30,13 @@ class CacheableDataModelConvert extends Convert {
 
         $cacheable_functions = $cacheable->get_cacheable_functions();
         foreach($cacheable_functions as $function) {
-            // We _run_ each function and assign its output via __set() so 
-            // that cached-objects "just work" (tm).
-            $cacheable->__set($function, $model->$function());
+            /*
+             * Running tests inside a project with its own YML config for 
+             * cacheable_fields and cacheable_functions will fail if we don't check first
+             */
+            if(method_exists($model, $function)) {
+                $cacheable->__set($function, $model->$function());
+            }
         }
 
         return $cacheable;
