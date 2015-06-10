@@ -249,7 +249,6 @@ class Cacheable extends SiteTreeExtension {
  * @author Deviate Ltd 2014-2015 http://www.deviate.net.nz
  * @package silverstripe-cachable
  * @todo Add unit tests to ensure exceptions are thrown in correct circumstances
- * @todo Ditto to ensure YML config overrides work A-OK for cache_mode and server_opts
  * @todo Move this into own class file
  */
 class CacheableConfig {
@@ -273,17 +272,20 @@ class CacheableConfig {
      * @return boolean True if "Memcached" extension is loaded
      */
     public static function configure_memcached() {
-        $defaultOpts = array(
-            'servers' => array(
-                'host' => '127.0.0.1',
-                'port' => 11211,
-                'weight' => 1
-            ),
-            'client' => array(
-            )
-        );
-        
         if(extension_loaded('memcached')) {
+            $defaultOpts = array(
+                'servers' => array(
+                    'host' => '127.0.0.1',
+                    'port' => 11211,
+                    'weight' => 1
+                ),
+                'client' => array(
+                    Memcached::OPT_DISTRIBUTION         => Memcached::DISTRIBUTION_CONSISTENT,
+                    Memcached::OPT_HASH                 => Memcached::HASH_MD5,
+                    Memcached::OPT_LIBKETAMA_COMPATIBLE => true,
+                )
+            );
+            
             // Use project-specific overridden opts, or the defaults
             $projectOpts = Config::inst()->get('CacheableConfig', 'opts');
             $serverOpts = ($projectOpts && !empty($projectOpts['memcached'])) ? $projectOpts['memcached']['servers'] : $defaultOpts['servers'];
