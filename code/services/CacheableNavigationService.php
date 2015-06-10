@@ -191,10 +191,11 @@ class CacheableNavigationService {
      * 
      * "Removes"  a cache-entry for the object (page) given in $this->get_model().
      * 
+     * @param boolean $forceRemoval Whether to unset() children in {@link CacheableSiteTree::removeChild()}.
      * @return boolean  false if the underlying calls to {@link Zend_Cache_Core::load()}
      *                  or {@link Zend_Cache_Core::save()} fail for any reason.
      */
-    public function removeCachedPage() {
+    public function removeCachedPage($forceRemoval = true) {
         $frontend = $this->getCacheableFrontEnd();
         $id = $this->getIdentifier();
         if(!$this->_cached) {
@@ -216,13 +217,13 @@ class CacheableNavigationService {
         if(isset($site_map[$model->ID])) {
             $parentCached = $site_map[$model->ID]->getParent();
             if($parentCached && $parentCached->ID && isset($site_map[$parentCached->ID])) {
-                $site_map[$parentCached->ID]->removeChild($model->ID);
+                $site_map[$parentCached->ID]->removeChild($model->ID, $forceRemoval);
             }
         }
         
         if($model->ParentID) {
             if(isset($site_map[$model->ParentID])) {
-                $site_map[$model->ParentID]->removeChild($model->ID);
+                $site_map[$model->ParentID]->removeChild($model->ID, $forceRemoval);
             }
         }
         
@@ -248,10 +249,11 @@ class CacheableNavigationService {
      * Note: If a cache entry already exists for a given object ID, it is removed 
      * and replaced.
      * 
-     * @return boolean  false if the underlying calls to {@link Zend_Cache_Core::load()}
-     *                  or {@link Zend_Cache_Core::save()} fail for any reason.
+     * @param boolean $forceRemoval Whether to unset() children in {@link CacheableSiteTree::removeChild()}.
+     * @return boolean              False if the underlying calls to {@link Zend_Cache_Core::load()}
+     *                              or {@link Zend_Cache_Core::save()} fail for any reason.
      */
-    public function refreshCachedPage() {
+    public function refreshCachedPage($forceRemoval = false) {
         $model = $this->get_model();
         $cacheableClass = 'CacheableSiteTree';
         $classes = array_reverse(ClassInfo::ancestry(get_class($model)));
@@ -277,7 +279,7 @@ class CacheableNavigationService {
         if(isset($site_map[$cacheable->ID])) {
             $parentCached = $site_map[$cacheable->ID]->getParent();
             if($parentCached && $parentCached->ID && isset($site_map[$parentCached->ID])) {
-                $site_map[$parentCached->ID]->removeChild($cacheable->ID);
+                $site_map[$parentCached->ID]->removeChild($cacheable->ID, $forceRemoval);
             }
             
             $children = $site_map[$cacheable->ID]->getAllChildren();

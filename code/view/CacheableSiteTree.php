@@ -123,15 +123,34 @@ class CacheableSiteTree extends CacheableData {
 
     }
 
-    public function addChild(CacheableData $data){
+    /**
+     * 
+     * @param CacheableData $data
+     * @return void
+     */
+    public function addChild(CacheableData $data) {
         $this->Children[$data->ID] = $data;
     }
 
-    public function removeChild($childID){
-        if(isset($this->Children[$childID])){
-            unset($this->Children[$childID]);
+    /**
+     * 
+     * "Removes" an item from the Children array, but by default not using PHP's 
+     * unset() function becuase this will cause PHP to reset its internal array 
+     * pointer and we need to maintain array state. Use the $force param to unset.
+     * 
+     * @param int $childID
+     * @param boolean $force    Invoke PHP's unset() function on the selected item.
+     * @return void
+     */
+    public function removeChild($childID, $force = true) {
+        if(isset($this->Children[$childID])) {
+            if($force === true) {
+                unset($this->Children[$childID]);
+            } else {
+                $this->Children[$childID] = CacheableSiteTree::create(); // dummy
+            }
         }
-     }
+    }
 
     public function setParent(CacheableData $data){
         $this->Parent = $data;
@@ -141,7 +160,11 @@ class CacheableSiteTree extends CacheableData {
         return $this->Parent;
     }
 
-    public function getAllChildren(){
+    /**
+     * 
+     * @return array
+     */
+    public function getAllChildren() {
         return $this->Children;
     }
 
@@ -211,36 +234,6 @@ class CacheableSiteTree extends CacheableData {
        if(empty($this->ParentID)) return false;
         $parent = $this->getParent();
         return !$parent || !$parent->exists() || $parent->isOrphaned();
-    }
-
-    function debug() {
-        $message = "<h3>cacheable data: ".get_class($this)."</h3>\n<ul>\n";
-        $message .= "\t<li>Cached Fields:\n<ul>\n";
-        foreach($this->get_cacheable_fields() as $field){
-            $message .= "\t<li>$field: ". $this->$field . "</li>\n";
-        }
-        $message .= "</ul>\n". "</li>\n";
-
-        $message .= "\t<li>Cached Functions:\n<ul>\n";
-        foreach($this->get_cacheable_functions() as $function){
-            $message .= "\t<li>$function: ". $this->$function . "</li>\n";
-        }
-        $message .= "</ul>\n". "</li>\n";
-
-        if($this->Parent) {
-            $message .= "\t<li>Cached Parent: ".$this->Parent->ID. ": ".$this->Parent->Title."</li>\n";
-        }
-
-        if(count($this->Children)){
-            $message .= "\t<li>Cached Children:\n<ul>\n";
-            foreach($this->Children as $childID => $child){
-                $message .= "\t<li>Cached child: ".$childID. ": ".$child->Title."</li>\n";
-            }
-            $message .=  "</ul>\n</li>\n";
-        }
-        $message .= "</ul>\n";
-
-        return $message;
     }
 
     function debug_simple(){

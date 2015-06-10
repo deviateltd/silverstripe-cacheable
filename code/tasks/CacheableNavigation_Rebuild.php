@@ -134,7 +134,7 @@ class CacheableNavigation_Rebuild extends BuildTask {
                             $percentComplete = $this->percentageComplete($i, $pageCount);
                             echo 'Caching: ' . trim($page->Title) . ' (' . $percentComplete . ') ' . self::new_line();
                             $service->set_model($page);
-                            $service->refreshCachedPage();
+                            $service->refreshCachedPage(true);
                         }
                     }
                 }

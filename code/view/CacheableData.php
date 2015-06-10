@@ -61,20 +61,83 @@ abstract class CacheableData extends ViewableData {
         return DataObject::get_by_id($this->ClassName, $this->ID);
     }
 
-    public function debug() {
-        $message = "<h3>cacheable data: ".get_class($this)."</h3>\n<ul>\n";
-        $message .= "\t<li>Cached Fields:\n<ul>\n";
-        foreach($this->get_cacheable_fields() as $field) {
-            $message .= "\t<li>$field: ". $this->$field . "</li>\n";
+    /**
+     * 
+     * Template function for debugging. Allows you to see at-a-glance, 
+     * the fields, functions and child nodes held in the Object-Cache about 
+     * the current object.
+     * 
+     * Usage:
+     * 
+     * <code>
+     *  <% with $CachedData %>
+     *  $Debug(98)
+     *  <% end_with %>
+     * <code>
+     * 
+     * @return string
+     */
+    public function Debug($id = null) {
+        if(!Director::isDev() || !isset($_REQUEST['showcache'])) {
+            return;
         }
-        $message .= "</ul>\n". "</li>\n";
+        
+        if($id) {
+            $mode = strtolower($_REQUEST['showcache']);
+            $conf = SiteConfig::current_site_config();
+            $cacheService = new CacheableNavigationService($mode, $conf);
+            $objectCache = $cacheService->getObjectCache();
+            $cachedSiteTree = $objectCache->get_site_map();
+            if(isset($cachedSiteTree[$id])) {
+                $object = $cachedSiteTree[$id];
+            } else {
+                return false;
+            }
+        } else {
+            $object = $this;
+        }
+        
+        $message = "<h2>Object-Cache fields & functions for: " . get_class($object) . "</h2>";
+        
+        $message .= "<ul>";
+            $message .= "\t<li><strong>Cached specifics:</strong>";
+                $message .= "\t\t<ul>";
+                    $message .= "\t\t\t<li>ID: " . $object->ID . "</li>";
+                    $message .= "\t\t\t<li>Title: " . $object->Title . "</li>";
+                    $message .= "\t\t\t<li>ClassName: " . $object->ClassName . "</li>";
+                    $message .= "\t\t\t<li>Child count: " . $object->getChildren()->count() . "</li>";
+                $message .= "\t\t</ul>";
+            $message .= "\t</li>";
+        $message .= "</ul>";
+                    
+        $message .= "<ul>";
+            $message .= "\t<li><strong>Cached Fields:</strong>";
+                $message .= "\t\t<ul>";
 
-        $message .= "\t<li>Cached Functions:\n<ul>\n";
-        foreach($this->get_cacheable_functions() as $function) {
-            $message .= "\t<li>$function: ". $this->$function . "</li>\n";
+                foreach($object->get_cacheable_fields() as $field) {
+                    $message .= "\t\t\t<li>" . $field . ': ' . $object->$field . "</li>";
+                }
+
+                $message .= "\t\t</ul>";
+            $message .= "\t</li>";
+            $message .= "\t<li><strong>Cached Functions:</strong>";
+                $message .= "\t\t<ul>";
+
+                foreach($object->get_cacheable_functions() as $function) {
+                    $message .= "\t\t\t<li>" . $function . '</li>';
+                }
+
+                $message .= "\t\t</ul>";
+            $message .= "\t</li>";
+        $message .= "</ul>";
+        
+        $message .= "<h2>Child nodes of this object:</h2>";
+        
+        $message .= '<ol>';
+        foreach($object->getChildren() as $child) {
+            $message .= "\t<li>" . $child->Title . ' (#' . $child->ID . ')</li>';
         }
-        $message .= "</ul>\n". "</li>\n";
-        $message .= "</ul>\n";
+        $message .= '</ol>';
 
         return $message;
     }

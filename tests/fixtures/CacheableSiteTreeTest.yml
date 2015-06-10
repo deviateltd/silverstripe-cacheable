@@ -1,0 +1,15 @@
+SiteTree:
+  sitetreetest-page-1:
+    ID: 1
+    Title: 'This is a parent page'
+  sitetreetest-page-2:
+    ID: 2
+    Title: 'This is a child page 1'
+    Parent: =>SiteTree.sitetreetest-page-1
+  sitetreetest-page-3:
+    ID: 3
+    Title: 'This is a child page 2'
+    Parent: =>SiteTree.sitetreetest-page-1
+SiteConfig:
+  default:
+    Title: Default

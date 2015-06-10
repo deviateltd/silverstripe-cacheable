@@ -15,10 +15,10 @@ class CacheableNavigationServiceTest extends SapphireTest {
     protected static $fixture_file = 'fixtures/CacheableNavigationServiceTest.yml';
     
     /**
-     * Cleanup after ourselves
+     * Cleanup
      */
-    public function tearDown() {
-        parent::tearDown();
+    public function setUp() {
+        parent::setUp();
         
         // Cleanup our test-only caches
         SS_Cache::factory(CACHEABLE_STORE_FOR)->clean(
@@ -32,7 +32,7 @@ class CacheableNavigationServiceTest extends SapphireTest {
      */
     public function testRefreshCachedPage() {
         $config = $this->objFromFixture('SiteConfig', 'default');
-        $model = $this->objFromFixture('SiteTree', 'test-page-1');
+        $model = $this->objFromFixture('SiteTree', 'servicetest-page-1');
         $service = new CacheableNavigationService('Live', $config, $model);
         
         // Cache should be empty
@@ -45,7 +45,7 @@ class CacheableNavigationServiceTest extends SapphireTest {
         
         $cachedObject = $service->_cached->get_site_map();
         $this->assertCount(1, $cachedObject);
-        // Why is $cachedObject not zero-indexed?
+        // $cachedObject not zero-indexed as array keys are taken for SS-generated ID's from each fixture
         $this->assertInstanceOf('CacheableSiteTree', $cachedObject[1]);
         $this->assertEquals('This is a simple page to be cached', $cachedObject[1]->Title);
     }
@@ -54,7 +54,7 @@ class CacheableNavigationServiceTest extends SapphireTest {
      * 
      */
     public function testRemoveCachedPage() {
-        $model = $this->objFromFixture('SiteTree', 'test-page-1');
+        $model = $this->objFromFixture('SiteTree', 'servicetest-page-1');
         $service = new CacheableNavigationService('Live', null, $model);
         
         // Entire cache should be empty
@@ -66,7 +66,7 @@ class CacheableNavigationServiceTest extends SapphireTest {
         $this->assertInstanceOf('CachedNavigation', $service->_cached);
        
         $cachedObject = $service->_cached->get_site_map();
-        // Why is $cachedObject not zero-indexed?
+        // $cachedObject not zero-indexed as array keys are taken for SS-generated ID's from each fixture
         $this->assertCount(1, $cachedObject);
         $this->assertInstanceOf('CacheableSiteTree', $cachedObject[1]);
         
@@ -101,7 +101,7 @@ class CacheableNavigationServiceTest extends SapphireTest {
      * 
      */
     public function testCompleteBuild() {
-        $model = $this->objFromFixture('SiteTree', 'test-page-1');
+        $model = $this->objFromFixture('SiteTree', 'servicetest-page-1');
         $service = new CacheableNavigationService('Live', null, $model);
         
         // Cache should be empty
