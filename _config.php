@@ -10,6 +10,12 @@
  * but this can be overriden in YML config. See the README for more options.
  */
 
+// On smaller CWP setups, allow the module as much RAM as it can offer
+// See: https://www.cwp.govt.nz/guides/technical-faq/php-configuration/ while logged-in
+if(defined('CWP_ENVIRONMENT') && intval(ini_get('memory_limit')) < 256) {
+    ini_set('memory_limit', '256M'); // upper limit of CWP "small" instances
+}
+
 define('CACHEABLE_STORE_DIR_NAME', 'cacheable');
 define('CACHEABLE_STORE_DIR_TEST', TEMP_FOLDER . DIRECTORY_SEPARATOR . 'cacheable_tests');
 define('CACHEABLE_STORE_NAME', 'cacheablestore');
