@@ -64,6 +64,9 @@ class CachableChunkedRefreshJob extends AbstractQueuedJob implements QueuedJob {
      * @return void
      */
 	public function __construct(CacheableNavigationService $service, $chunk, $stage, $subsiteID) {
+        // Increase memory to max-allowable
+        CacheableConfig::configure_memory_limit();
+        
         // Setters required for internal methods except $this->process()
         $this->setService($service);
         $this->setChunk($chunk);

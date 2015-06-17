@@ -266,6 +266,33 @@ class CacheableConfig {
      * @var string
      */
     protected static $current_mode = '';
+    
+    /**
+     * 
+     * Used for the new memory_limit value for display in arbitrary calling logic.
+     * 
+     * @var int
+     */
+    public static $ini_modified_memory_limit = 0;
+    
+    /**
+     * 
+     * On smaller setups, CWP being one; allow the module as much RAM as it can offer.
+     * See the URL below for why we cannot go above this in CWP, read: Suhosin.
+     * 
+     * @see https://www.cwp.govt.nz/guides/technical-faq/php-configuration/.
+     * @todo Make generic: Check for Suhosin memory limit. Increase memory if current allocation < Suhosin allows
+     * @return void
+     */
+    public static function configure_memory_limit() {
+        // In testing, with sites in excess of 1000 pages, we've not seen anything greater
+        // than 170Mb per queued chunk-set
+        $newLimit = 256; // upper limit of CWP "small" instances becuase of Suhosin
+        if(defined('CWP_ENVIRONMENT') && intval(ini_get('memory_limit')) < $newLimit) {
+            ini_set('memory_limit', $newLimit . 'M');
+            self::$ini_modified_memory_limit = $newLimit;
+        }
+    }
    
     /**
      * 
