@@ -81,5 +81,72 @@ class CacheableSiteTreeTest extends SapphireTest {
         $this->assertEquals('This is a child page 1', $firstItem->Title);
     }
     
+    /**
+     * Ensure with and without filters, we get expected output
+     */
+    public function testGetChildren() {
+        $config = $this->objFromFixture('SiteConfig', 'default');
+        $parent = $this->objFromFixture('SiteTree', 'sitetreetest-page-1');
+        $children = $parent->Children()->toArray();
+        $models = array_merge(array($parent), $children);
+        
+        // Fake a rebuild task - Populate the object-cache with our fixture data
+        foreach($models as $model) {
+            $service = new CacheableNavigationService('Live', $config, $model);
+            $service->refreshCachedPage();
+        }
+        
+        // Fetch the cache
+        $objCache = $service->getObjectCache();
+        $siteMap = $objCache->get_site_map();
+        
+        // Default: No custom filters passed - return everything
+        $children = $siteMap[1]->getChildren();
+        $this->assertEquals(2, $children->count());
+        
+        // Default: No custom filters passed - return everything
+        $children = $siteMap[1]->getChildren(true, null);
+        $this->assertEquals(2, $children->count());
+        
+        // Default: No custom filters passed - return everything
+        $children = $siteMap[1]->getChildren(true, array());
+        $this->assertEquals(2, $children->count());
+
+        // Default: No custom filters passed - return everything
+        $children = $siteMap[1]->getChildren(false, array());
+        $this->assertEquals(2, $children->count());
+        
+        // Don't filter and still no filters passed
+        $children = $siteMap[1]->getChildren(false, null);
+        $this->assertEquals(2, $children->count());
+        
+        // Don't filter and filters passed
+        $children = $siteMap[1]->getChildren(false, array('Title' => 'This is a child page 2'));
+        $this->assertEquals(1, $children->count());
+        
+        // Do filter and filters passed
+        $children = $siteMap[1]->getChildren(true, array('Title' => 'This is a child page 1'));
+        $this->assertEquals(2, $children->count());
+        
+        // Do filter and filters passed
+        $children = $siteMap[1]->getChildren(true, array('Title' => 'This is a child page 2'));
+        $this->assertEquals(2, $children->count());
+        
+        // Do filter and filters passed
+        $children = $siteMap[1]->getChildren(false, array('Title' => 'This is a child page 2'));
+        $this->assertEquals(1, $children->count());
+        
+        // Do filter and "bad" filter passed
+        $children = $siteMap[1]->getChildren(false, array('Title' => 'This is a child page null'));
+        $this->assertEquals(0, $children->count());
+       
+        $children = $siteMap[1]->getChildren(true, array('Dummy' => null));
+        $this->assertEquals(2, $children->count());
+        
+        $children = $siteMap[1]->getChildren(false, array('Dummy' => null));
+        $this->assertEquals(2, $children->count());
+        
+    }
+    
 }
 

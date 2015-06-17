@@ -168,13 +168,27 @@ class CacheableSiteTree extends CacheableData {
         return $this->Children;
     }
 
-    public function getChildren(){
+    /**
+     * 
+     * Get all child nodes of the current node and apply an optional filter. The 
+     * default is to return all children using ShowInMenus=1 if no/dummy/bad filter
+     * is passed.
+     * 
+     * @param boolean $showInMenusFilter Whether or not to apply the ShowInMenus filter
+     * @param array $filter
+     * @return ArrayList
+     */
+    public function getChildren($showInMenusFilter = true, $filter = array()) {
         $children = new ArrayList($this->Children);
-        $children = $children->filter(
-            array(
-                "ShowInMenus" => 1
-            )
-        );
+        // If $showInMenusFilter is true, _always_ apply 'ShowInMenus' => 1
+        if($showInMenusFilter === true) {
+            $filter = array('ShowInMenus' => 1);
+        }
+        
+        if($filter) {
+            $children = $children->filter($filter);
+        }
+        
         $visible = array();
         foreach($children as $child) {
             if($child->canView()) {
