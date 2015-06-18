@@ -226,16 +226,27 @@ class CacheableSiteTree extends CacheableData {
         }
     }
     private $_cached_is_section = null;
+    
+    /**
+     * 
+     * @return boolean
+     */
     public function isSection() {
-        if($this->_cached_is_section === null){
-            if($this->isCurrent()) $this->_cached_is_section = true;
-            else{
-                $currentPage = Director::get_current_page();
-                $navigation = $this->CachedNavigation();
-                $ancestors = $navigation->getAncestores($currentPage->ID);
-                $this->_cached_is_section = $currentPage instanceof SiteTree && in_array($this->ID, $ancestors->column());
+        $isSection = false;
+        if($this->_cached_is_section === null) {
+            if($this->isCurrent()) {
+                $isSection = true;
+            } else {
+                if($navigation = $this->CachedNavigation()) {
+                    $currentPage = Director::get_current_page();
+                    $ancestors = $navigation->getAncestores($currentPage->ID);
+                    $isSection = $currentPage instanceof SiteTree && in_array($this->ID, $ancestors->column());
+                }
             }
+            
+            $this->_cached_is_section = $isSection;
         }
+        
         return $this->_cached_is_section;
     }
 

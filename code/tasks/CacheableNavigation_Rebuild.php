@@ -244,6 +244,7 @@ class CacheableNavigation_Rebuild extends BuildTask {
     }
     
     /**
+     * 
      * Summarise the task's configuration details at the end of a run.
      * 
      * @param string $totalTime
@@ -266,12 +267,13 @@ class CacheableNavigation_Rebuild extends BuildTask {
          * Is the system underpowered enough such that {@link CacheableConfig::configure_memory_limit()}
          * has kicked-in? Notify the user accordingly.
          */
-        $memMode = CacheableConfig::$ini_modified_memory_limit ? 'Modified' : 'PHP Default';
+        $memMode = CacheableConfig::$ini_modified_memory_limit ? 'Auto-modified' : 'PHP Default';
         
         echo 'Job Queue: ' . $queueOn . $queueSkipped . self::new_line();
         echo 'Cache backend: ' . CacheableConfig::current_cache_mode() . self::new_line();
         echo 'Peak memory: ' . $this->memory() . 'Mb' . self::new_line();
         echo 'Execution time: ' . $totalTime . 's' . self::new_line();
         echo 'System memory_limit: ' . ini_get('memory_limit') . ' (' . $memMode . ')' . self::new_line();
+        echo 'Cache directory: ' . CACHEABLE_STORE_DIR . self::new_line();
     }
 }
