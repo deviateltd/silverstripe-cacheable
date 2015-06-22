@@ -3,6 +3,11 @@ Name: cacheable_navigation_config
 After:
   - 'framework/*'
   - 'cms/*'
+---
+Director:
+  rules:
+    cacheable/inspector: CacheableCacheInspectorController
+---
 Only:
   Environment: 'dev'
 ---

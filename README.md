@@ -1,6 +1,6 @@
 # SilverStripe Cacheable
 
-Cachable is an Object Cache and was originally designed to only cache SiteTree objects normally found in
+Cachable is an Object Cache for SilverStripe. It was originally designed to only cache SiteTree objects normally found in
 website navigation hierarchies, in order to improve site performance. Future versions aim
 to allow an increased range of standard SilverStripe DataObjects to be cached.
 
@@ -184,6 +184,15 @@ option in your YML config, and specify an alternate location that will be left a
     CacheableConfig:
     # Instruct Cacheable to build the cache in a custom location
       alt_cache_dir: '/tmp'
+
+## Cache inspector
+
+If you have CMS admin access, you can request a specific URL to inspect the state
+of your caches. The URI is: `/cacheable/inspector` and it provides the following information:
+
+ * No. Cached objects vs Database derived totals - useful for debugging
+ * The backend currently in-use
+ * Cache file-listing, no. files, total cache disk usage, cache last-updated time etc ("File" backend only)
 
 ## FAQ
 
