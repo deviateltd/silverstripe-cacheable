@@ -178,12 +178,21 @@ Similarly you do the same for your custom site config, via `CacheableSiteConfig`
 Out of the box when using the "file" backend, Cacheable will store its object cache files
 in a directory called "cacheable" under SilverStripe's temp folder. However in some circumstances
 such as when using the [Deploynaut](https://github.com/silverstripe/deploynaut) deployment system, SilverStripe's temp directory is
-deleted and re-created, thus truncating your cache entirely. In this case, you can use the "alt_cache_dir"
-option in your YML config, and specify an alternate location that will be left alone:
+deleted and re-created, thus truncating your cache entirely. In this case, you can use the `alt_cache_dir`
+option in your YML config, which specifies an alternate location that Deploynaut will leave alone:
+
+__Note:__ Any custom directory locations are always made relative to the `assets` directory. This makes
+the cache portable on those platforms that replicate / duplicate database and assets onto other VM's or bare metal.
+
+Instruct Cacheable to build the cache under: `assets/_foo/bar/cacheable`:
 
     CacheableConfig:
-    # Instruct Cacheable to build the cache in a custom location
-      alt_cache_dir: '/tmp'
+      alt_cache_dir: 'foo/bar'
+
+ Instruct Cacheable to build the cache under: `assets/_cacheable`:
+
+    CacheableConfig:
+      alt_cache_dir: cacheable
 
 ## Cache inspector
 
