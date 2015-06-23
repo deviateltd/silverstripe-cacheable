@@ -17,21 +17,7 @@ define('CACHEABLE_STORE_FOR', 'Cacheable');
 define('CACHEABLE_STORE_TAG_DEFAULT', 'cacheable_tag_nav'); // Default Zend tag name for this cache 
 define('CACHEABLE_STORE_TAG_DEFAULT_TEST', 'cacheable_tag_nav_test');
 define('CACHEABLE_STORE_WEIGHT', 1000);
-
-// If project YML specifies an alternate cache folder, deal with it.
-if($altCacheDir = Config::inst()->get('CacheableConfig', 'alt_cache_dir')) {
-    $cacheDir = rtrim($altCacheDir, '/') 
-            . DIRECTORY_SEPARATOR 
-            . CACHEABLE_STORE_DIR_NAME 
-            . DIRECTORY_SEPARATOR
-            . getTempFolderUsername(); 
-} else {
-    $cacheDir = TEMP_FOLDER
-            . DIRECTORY_SEPARATOR
-            . CACHEABLE_STORE_DIR_NAME;
-}
-
-define('CACHEABLE_STORE_DIR', $cacheDir);
+define('CACHEABLE_STORE_DIR', CacheableConfig::cache_dir_name());
 
 CacheableConfig::configure();
 SS_Cache::pick_backend(CACHEABLE_STORE_NAME, CACHEABLE_STORE_FOR, CACHEABLE_STORE_WEIGHT);

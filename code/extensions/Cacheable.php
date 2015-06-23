@@ -468,6 +468,35 @@ class CacheableConfig {
         
         return false;
     }
+    
+    /**
+     * 
+     * Deal with userland alternate cache location for the "File" backend. This should 
+     * always be relative to the assets dir for portability.
+     * 
+     * The default if no such setting is present, is to place the cache directory
+     * beneath SilverStripe's tmp dir.
+     * 
+     * @return string
+     */
+    public static function cache_dir_name() {
+        $altCacheDir = Config::inst()->get('CacheableConfig', 'alt_cache_dir');
+        $charMask = " \t\n\r\0\x0B/";
+        if($altCacheDir) {
+            $altDir = trim($altCacheDir, $charMask);
+            // If alt_cache_dir matches "cacheable", just use that
+            if($altDir === CACHEABLE_STORE_DIR_NAME) {
+                $cacheDir = '_' . CACHEABLE_STORE_DIR_NAME;
+            } else {
+                $cacheDir = '_' . $altDir . DIRECTORY_SEPARATOR . CACHEABLE_STORE_DIR_NAME;
+            }
+            $cacheDir = ASSETS_PATH . DIRECTORY_SEPARATOR . $cacheDir;
+        } else {
+            $cacheDir = TEMP_FOLDER . DIRECTORY_SEPARATOR . CACHEABLE_STORE_DIR_NAME;
+        }
+        
+        return $cacheDir;
+    }
 }
 
 /**
