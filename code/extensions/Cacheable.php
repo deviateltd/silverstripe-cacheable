@@ -388,6 +388,12 @@ class CacheableConfig {
         if(!$storeIsOk) {
             return false;
         }
+        
+        // Write server config files to cache-dir if it should exist relative to "assets"
+        self::protect_cache_dir();
+
+        // Update SilverStripe so it leaves cache-dirs under "assets" alone when attempting to sync assets
+        self::prevent_cache_dir_sync($cacheable_store_dir);
 
         SS_Cache::add_backend(CACHEABLE_STORE_NAME, 'File', array(
             'cache_dir' => $cacheable_store_dir,
@@ -434,7 +440,7 @@ class CacheableConfig {
             throw new CacheableException('The configured cache mode: "$mode" doesn\'t exist.');
         }
         
-        // Default to F/S if one of the modes isn't playing ball
+        // Default to "File" backend if one of the modes isn't playing ball
         if(!self::$confMethodName()) {
             if(!self::configure_file()) {
                 throw new CacheableException('Unable to select a cache backend. Giving up.');
@@ -479,7 +485,7 @@ class CacheableConfig {
      * 
      * @return string
      */
-    public static function cache_dir_name() {
+    public static function cache_dir_path() {
         $altCacheDir = Config::inst()->get('CacheableConfig', 'alt_cache_dir');
         $charMask = " \t\n\r\0\x0B/";
         if($altCacheDir) {
@@ -496,6 +502,91 @@ class CacheableConfig {
         }
         
         return $cacheDir;
+    }
+    
+    /**
+     * 
+     * Return the URI relative-to, and including the "assets" folder.
+     * 
+     * @param boolean $withAssets
+     * @return boolean|string
+     */
+    public static function cache_dir_location($withAssets = true) {
+        $cacheDirPath = self::cache_dir_path();
+        $isCacheDirRelative = stristr($cacheDirPath, ASSETS_DIR) !== false;
+        if($isCacheDirRelative) {
+            $uriTruncated = substr($cacheDirPath, 0, strpos($cacheDirPath, ASSETS_DIR));
+            $result = str_replace($uriTruncated, '', $cacheDirPath);
+            if($withAssets) {
+                return '/' . $result;
+            }
+            return str_replace(ASSETS_DIR, '', $result);
+        }
+        
+        return false;
+    }
+    
+    /**
+     * 
+     * Simply return the name of the bottom-level dir in which cache files will be stored.
+     * Takes into account userland config viz `alt_cache_dir`.
+     * 
+     * Examples:
+     * 
+     * - alt_cache_dir: 'foo/bar' --> "bar"
+     * - alt_cache_dir: 'cacheable' --> "cacheable"
+     * 
+     * @param string $cacheDir
+     * @return string
+     */
+    public static function cache_dir_name($cacheDir) {
+        return pathinfo($cacheDir, PATHINFO_FILENAME);
+    }
+    
+    /**
+     * 
+     * Generate files appropriate to the host webserver for protecting access to the
+     * cache dir TTW. Only in use when using "File" backend via {@link self::configure_file()}
+     * and the userland `alt_cache_dir` config is present.
+     * 
+     * @return void
+     */
+    private static function protect_cache_dir() {
+        $altCacheDir = Config::inst()->get('CacheableConfig', 'alt_cache_dir');
+        $isHttpdConf = file_exists(self::cache_dir_path() . DIRECTORY_SEPARATOR . '.htaccess');
+        if($altCacheDir && !$isHttpdConf) {
+            // Source SS template files for copying into final config 
+            $resourceDir = CACHEABLE_MODULE_DIR . DIRECTORY_SEPARATOR . 'templates/resources';
+            $httpdConf =  file_get_contents($resourceDir . DIRECTORY_SEPARATOR . 'htaccess.ss');
+            $iisConf = file_get_contents($resourceDir . DIRECTORY_SEPARATOR . 'webconfig.ss');
+
+            file_put_contents(self::cache_dir_path() . DIRECTORY_SEPARATOR . '.htaccess', $httpdConf);
+            file_put_contents(self::cache_dir_path() . DIRECTORY_SEPARATOR . 'web.config', $iisConf);
+        }
+    }
+    
+    /**
+     * 
+     * Update SilverStripe's understanding of the full range of "unsyncable" asset
+     * folder sub-dirs. Only called in the context of the "File" backend and if userland
+     * config setting exists for `alt_cache_dir`.
+     * 
+     * Examples:
+     * 
+     * - alt_cache_dir: '/foo/bar' --> "^/_foo$/i" is added to Filesystem::sync_blacklisted_patterns.
+     * - alt_cache_dir: '/cacheable' --> "^/_cacheable$/i" is added to Filesystem::sync_blacklisted_patterns.
+     * 
+     * @see Unit tests for {@link self::cache_dir_path()} for more context.
+     * @return void
+     */
+    public static function prevent_cache_dir_sync() {
+        $altCacheDir = Config::inst()->get('CacheableConfig', 'alt_cache_dir');
+        if($altCacheDir) {
+            $cachePathLocation = self::cache_dir_location(false);
+            $cachePathParts = explode('/', ltrim($cachePathLocation, '/'));
+            $pattern = "/^" . $cachePathParts[0] . "$/i";
+            Config::inst()->update('Filesystem', 'sync_blacklisted_patterns', array($pattern));
+        }
     }
 }
 

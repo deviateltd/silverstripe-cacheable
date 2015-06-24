@@ -2,7 +2,7 @@
     "name": "deviateltd/silverstripe-cacheable",
     "description": "SilverStripe page and object caching",
     "type": "silverstripe-module",
-    "keywords": ["silverstripe", "cache", "caching", "cacheable"],
+    "keywords": ["silverstripe", "cache", "caching", "cacheable", "object"],
     "authors": [
         {
             "name": "Normann Lou",

@@ -17,7 +17,8 @@ define('CACHEABLE_STORE_FOR', 'Cacheable');
 define('CACHEABLE_STORE_TAG_DEFAULT', 'cacheable_tag_nav'); // Default Zend tag name for this cache 
 define('CACHEABLE_STORE_TAG_DEFAULT_TEST', 'cacheable_tag_nav_test');
 define('CACHEABLE_STORE_WEIGHT', 1000);
-define('CACHEABLE_STORE_DIR', CacheableConfig::cache_dir_name());
+define('CACHEABLE_STORE_DIR', CacheableConfig::cache_dir_path());
+define('CACHEABLE_MODULE_DIR', __DIR__);
 
 CacheableConfig::configure();
 SS_Cache::pick_backend(CACHEABLE_STORE_NAME, CACHEABLE_STORE_FOR, CACHEABLE_STORE_WEIGHT);
