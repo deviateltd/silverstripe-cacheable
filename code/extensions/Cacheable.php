@@ -400,7 +400,7 @@ class CacheableConfig {
         self::protect_cache_dir();
 
         // Update SilverStripe so it leaves cache-dirs under "assets" alone when attempting to sync assets
-        self::prevent_cache_dir_sync($cacheable_store_dir);
+        self::prevent_cache_dir_sync();
 
         SS_Cache::add_backend(CACHEABLE_STORE_NAME, 'File', array(
             'cache_dir' => $cacheable_store_dir,
