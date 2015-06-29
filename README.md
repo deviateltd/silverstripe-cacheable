@@ -203,6 +203,12 @@ of your caches. The URI is: `/cacheable/inspector` and it provides the following
  * The backend currently in-use
  * Cache file-listing, no. files, total cache disk usage, cache last-updated time etc ("File" backend only)
 
+## Known issues
+
+Sites that utilise controller-only "Pages" aren't necessarily related to a `SiteTree` object
+and therefore will have no entry to reference in the object-cache. In these instances e.g. `/admin/login`
+we default to using the homepage's cache-entry.
+
 ## FAQ
 
  Q: Why the references to "CacheableNavigation" all over the place?
