@@ -181,18 +181,25 @@ class Cacheable extends SiteTreeExtension {
 
     /**
      * 
+     * Usually used in template logic inside <% with %> blocks.
+     * 
+     * @see README.md
      * @return mixed ContentController | array
+     * @todo What to do with controller URLs other than returning the homepage's cache?
      */
     public function CachedData() {
-        if($this->owner->exists()) {
-            if($cachedNavigiation = Config::inst()->get('Cacheable', '_cached_navigation')) {
-                if($cachedNavigiation->isUnlocked() && $cachedNavigiation->get_completed()) {
-                    $site_map = $cachedNavigiation->get_site_map();
-                    if(!empty($site_map[$this->owner->ID])) {
-                        return $site_map[$this->owner->ID];
-                    }
-                    return array();
+        if($cachedNavigiation = Config::inst()->get('Cacheable', '_cached_navigation')) {
+            if($cachedNavigiation->isUnlocked() && $cachedNavigiation->get_completed()) {
+                $site_map = $cachedNavigiation->get_site_map();
+                if(!empty($site_map[$this->owner->ID])) {
+                    return $site_map[$this->owner->ID];
                 }
+                
+                /*
+                 * Prevent errors and go-slows for controller URLs e.g. /admin 
+                 * and return the homepage's cache as a 'sensible' default
+                 */
+                return $site_map[1];
             }
         }
 
