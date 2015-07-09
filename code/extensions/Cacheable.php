@@ -199,7 +199,11 @@ class Cacheable extends SiteTreeExtension {
                  * Prevent errors and go-slows for controller URLs e.g. /admin 
                  * and return the homepage's cache as a 'sensible' default
                  */
-                return $site_map[1];
+                // check if isset($site_map)[1]; since there is some page created on flying, login page, search page, etc, etc
+                if(isset($site_map[1])) {
+                    return $site_map[1];
+                }
+                
             }
         }
 
