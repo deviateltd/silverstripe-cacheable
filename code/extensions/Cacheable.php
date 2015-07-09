@@ -384,10 +384,8 @@ class CacheableConfig {
      */
     public static function configure_file() {     
         $cacheable_store_dir = self::is_running_test() ? CACHEABLE_STORE_DIR_TEST : CACHEABLE_STORE_DIR;
-        // Tell PHP not to cache $cacheable_store_dir for when dev's need to change it
-        clearstatcache();
         if(!is_dir($cacheable_store_dir)) {
-            mkdir($cacheable_store_dir, 0777, true);
+            mkdir($cacheable_store_dir, Config::inst()->get('Filesystem', 'folder_create_mask'));
         }
         
         $storeIsOk = (
