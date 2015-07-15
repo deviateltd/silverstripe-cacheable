@@ -121,7 +121,11 @@ class CacheableCacheInspectorController extends Controller {
         $service = new CacheableNavigationService($stage, $conf);
         $cache = $service->getObjectCache();
         if($cache && $siteMap = $cache->get_site_map()) {
-            $cachedSiteTree = ArrayList::create($siteMap);
+            // For reasons unknown, items appear in object-cache with NULL properties
+            $cachedSiteTree = ArrayList::create($siteMap)->filterByCallback(function($item) {
+                return !is_null($item->ParentID);
+            });
+            
             return $cachedSiteTree->count();
         }
         
