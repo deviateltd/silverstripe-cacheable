@@ -1,10 +1,18 @@
 <?php
 /**
+ * 
+ * Object-cached representation of a SilverStripe {@link SiteTree} object.
+ * 
+ * Warning: The API surface of a cacheable object differs from its SilverStripe
+ * core counterpart. While developers have the opportunity to fine-tune what properties
+ * and methods are cached via YML config (See README) do not rely on core methods
+ * always being callable.
+ * 
  * @author Deviate Ltd 2014-2015 http://www.deviate.net.nz
  * @package silverstripe-cachable
  */
 class CacheableSiteTree extends CacheableData {
-    
+
     /**
      *
      * @var array
@@ -40,70 +48,93 @@ class CacheableSiteTree extends CacheableData {
      * @var CacheableSiteTree
      */
     private $Parent;
+    
+    /**
+     *
+     * @var boolean
+     */
+    private $_cached_is_section = null;
 
     /**
      * 
      * @return SiteConfig
      */
-    public function getSiteConfig(){
+    public function getSiteConfig() {
         if($this->hasMethod('alternateSiteConfig')) {
             $altConfig = $this->alternateSiteConfig();
-            if($altConfig) return $altConfig;
+            if($altConfig) {
+                return $altConfig;
+            }
         }
 
-        if($nav = Config::inst()->get('Cacheable', '_cached_navigation')){
-            if($nav) {
-                $site_map = $nav->get_site_map();
-                $site_config = $nav->get_site_config();
-                if(isset($site_map[$this->ID]) && $site_config->exists()) {
-                    return $site_config;
-                }
+        if($nav = Config::inst()->get('Cacheable', '_cached_navigation')) {
+            $site_map = $nav->get_site_map();
+            $site_config = $nav->get_site_config();
+            if(isset($site_map[$this->ID]) && $site_config->exists()) {
+                return $site_config;
             }
         }
 
         return SiteConfig::current_site_config();
     }
 
-    public function getCachedSourceQueryParam($key){
-        if(isset($this->getSourceQueryParams[$key])) return $this->getSourceQueryParams[$key];
-        else return null;
+    /**
+     * 
+     * @param mixed string|int $key
+     * @return mixed
+     */
+    public function getCachedSourceQueryParam($key) {
+        if(isset($this->getSourceQueryParams[$key])) {
+            return $this->getSourceQueryParams[$key];
+        }
+        
+        return null;
     }
 
-    public function canView($member = null){
+    /**
+     * 
+     * @param Member $member
+     * @return boolean
+     */
+    public function canView($member = null) {
         if(!$member || !(is_a($member, 'Member')) || is_numeric($member)) {
             $member = Member::currentUserID();
         }
 
         // admin override
-        if($member && Permission::checkMember($member, array("ADMIN", "SITETREE_VIEW_ALL"))) return true;
+        if($member && Permission::checkMember($member, array("ADMIN", "SITETREE_VIEW_ALL")))
+            return true;
         // make sure we were loaded off an allowed stage
-
         // Were we definitely loaded directly off Live during our query?
         $fromLive = true;
-        foreach (array('mode' => 'stage', 'stage' => 'live') as $param => $match) {
-            $fromLive = $fromLive && strtolower((string)$this->getCachedSourceQueryParam("Versioned.$param")) == $match;
+        foreach(array('mode' => 'stage', 'stage' => 'live') as $param => $match) {
+            $fromLive = $fromLive && strtolower((string) $this->getCachedSourceQueryParam("Versioned.$param")) == $match;
         }
-        if(!$fromLive
-            && !Session::get('unsecuredDraftSite')
-            && !Permission::checkMember($member, array('CMS_ACCESS_LeftAndMain', 'CMS_ACCESS_CMSMain', 'VIEW_DRAFT_CONTENT'))) {
+        if(!$fromLive && !Session::get('unsecuredDraftSite') && !Permission::checkMember($member, array('CMS_ACCESS_LeftAndMain', 'CMS_ACCESS_CMSMain', 'VIEW_DRAFT_CONTENT'))) {
             // If we weren't definitely loaded from live, and we can't view non-live content, we need to
             // check to make sure this version is the live version and so can be viewed
-            if (Versioned::get_versionnumber_by_stage($this->ClassName, 'Live', $this->ID) != $this->Version) return false;
+            if(Versioned::get_versionnumber_by_stage($this->ClassName, 'Live', $this->ID) != $this->Version)
+                return false;
         }
 
         // Orphaned pages (in the current stage) are unavailable, except for admins via the CMS
-        if($this->isOrphaned()) return false;
+        if($this->isOrphaned())
+            return false;
 
         // Standard mechanism for accepting permission changes from extensions
         $extended = $this->extendedCan('canView', $member);
-        if($extended !== null) return $extended;
+        if($extended !== null)
+            return $extended;
         // check for empty spec
-        if(!$this->CanViewType || $this->CanViewType == 'Anyone') return true;
+        if(!$this->CanViewType || $this->CanViewType == 'Anyone')
+            return true;
 
         // check for inherit
         if($this->CanViewType == 'Inherit') {
-            if($parent = $this->getParent()) return $parent->canView($member);
-            else return $this->getSiteConfig()->canView($member);
+            if($parent = $this->getParent())
+                return $parent->canView($member);
+            else
+                return $this->getSiteConfig()->canView($member);
         }
 
         // check for any logged-in users
@@ -112,15 +143,14 @@ class CacheableSiteTree extends CacheableData {
         }
 
         // check for specific groups
-        if($member && is_numeric($member)) $member = DataObject::get_by_id('Member', $member);
+        if($member && is_numeric($member))
+            $member = DataObject::get_by_id('Member', $member);
         if(
-            $this->CanViewType == 'OnlyTheseUsers'
-            && $member
-            && $member->inGroups($this->ViewerGroups)
-        ) return true;
+                $this->CanViewType == 'OnlyTheseUsers' && $member && $member->inGroups($this->ViewerGroups)
+        )
+            return true;
 
         return false;
-
     }
 
     /**
@@ -152,11 +182,19 @@ class CacheableSiteTree extends CacheableData {
         }
     }
 
-    public function setParent(CacheableData $data){
+    /**
+     * 
+     * @param CacheableData $data
+     */
+    public function setParent(CacheableData $data) {
         $this->Parent = $data;
     }
 
-    public function getParent(){
+    /**
+     * 
+     * @return CacheableData
+     */
+    public function getParent() {
         return $this->Parent;
     }
 
@@ -184,11 +222,11 @@ class CacheableSiteTree extends CacheableData {
         if($showInMenusFilter === true) {
             $filter = array('ShowInMenus' => 1);
         }
-        
+
         if($filter) {
             $children = $children->filter($filter);
         }
-        
+
         $visible = array();
         foreach($children as $child) {
             if($child->canView()) {
@@ -216,7 +254,11 @@ class CacheableSiteTree extends CacheableData {
         return $this->isSection() ? 'section' : 'link';
     }
 
-    public function LinkingMode(){
+    /**
+     * 
+     * @return string
+     */
+    public function LinkingMode() {
         if($this->isCurrent()) {
             return 'current';
         } elseif($this->isSection()) {
@@ -225,8 +267,7 @@ class CacheableSiteTree extends CacheableData {
             return 'link';
         }
     }
-    private $_cached_is_section = null;
-    
+
     /**
      * 
      * @return boolean
@@ -243,37 +284,58 @@ class CacheableSiteTree extends CacheableData {
                     $isSection = $currentPage instanceof SiteTree && in_array($this->ID, $ancestors->column());
                 }
             }
-            
+
             $this->_cached_is_section = $isSection;
         }
-        
+
         return $this->_cached_is_section;
     }
 
-    public function isCurrent(){
+    /**
+     * 
+     * @return boolean
+     */
+    public function isCurrent() {
         return $this->ID ? $this->ID == Director::get_current_page()->ID : $this === Director::get_current_page();
     }
 
+    /**
+     * 
+     * @return boolean
+     */
     public function isOrphaned() {
         // Always false for root pages
-       if(empty($this->ParentID)) return false;
+        if(empty($this->ParentID)) {
+            return false;
+        }
+        
         $parent = $this->getParent();
+        
         return !$parent || !$parent->exists() || $parent->isOrphaned();
     }
 
-    function debug_simple(){
-        $message = "<h5>cacheable data: ".get_class($this)."</h5><ul>";
-        $message .= "<il>ID: ".$this->ID.". Title: ".$this->Title.". ClassName".$this->ClassName."</il>";
+    /**
+     * 
+     * @return string
+     */
+    public function debug_simple() {
+        $message = "<h5>cacheable data: " . get_class($this) . "</h5><ul>";
+        $message .= "<il>ID: " . $this->ID . ". Title: " . $this->Title . ". ClassName" . $this->ClassName . "</il>";
         $parent = $this->getParent();
         if($parent && $parent->exists()) {
-            $message .= "<il>Parent ID: ".$parent->ID.". Title: ".$parent->Title.". ClassName".$parent->ClassName."</il>";
+            $message .= "<il>Parent ID: " . $parent->ID . ". Title: " . $parent->Title . ". ClassName" . $parent->ClassName . "</il>";
         }
         $message .= "</ul>";
         return $message;
     }
 
-    public function Menu($level=1){
-        if($nav = $this->CachedNavigation()){
+    /**
+     * 
+     * @param int $level
+     * @return ArrayList
+     */
+    public function Menu($level = 1) {
+        if($nav = $this->CachedNavigation()) {
             if($level == 1) {
                 $root_elements = new ArrayList($nav->get_root_elements());
                 $result = $root_elements->filter(array(
@@ -282,22 +344,22 @@ class CacheableSiteTree extends CacheableData {
             } else {
                 $dataID = Director::get_current_page()->ID;
                 $site_map = $nav->get_site_map();
-                if(isset($site_map[$dataID])){
+                if(isset($site_map[$dataID])) {
                     $parent = $site_map[$dataID];
 
                     $stack = array($parent);
-                    if($parent){
-                        while($parent = $parent->getParent()){
+                    if($parent) {
+                        while($parent = $parent->getParent()) {
                             array_unshift($stack, $parent);
                         }
                     }
 
-                    if(isset($stack[$level-2])) {
-                        $elements = new ArrayList($stack[$level-2]->getAllChildren());
+                    if(isset($stack[$level - 2])) {
+                        $elements = new ArrayList($stack[$level - 2]->getAllChildren());
                         $result = $elements->filter(
-                            array(
-                                "ShowInMenus" => 1,
-                            )
+                                array(
+                                    "ShowInMenus" => 1,
+                                )
                         );
                     }
                 }
@@ -314,16 +376,48 @@ class CacheableSiteTree extends CacheableData {
                     }
                 }
             }
+            
             return new ArrayList($visible);
         }
     }
 
-    public function CachedNavigation()
-    {
-        if ($cachedNavigiation = Config::inst()->get('Cacheable', '_cached_navigation')) {
-            if ($cachedNavigiation->isUnlocked() && $cachedNavigiation->get_completed()) {
+    /**
+     * 
+     * @return CachedNavigation
+     */
+    public function CachedNavigation() {
+        if($cachedNavigiation = Config::inst()->get('Cacheable', '_cached_navigation')) {
+            if($cachedNavigiation->isUnlocked() && $cachedNavigiation->get_completed()) {
                 return $cachedNavigiation;
             }
         }
     }
+
+    /**
+     * 
+     * Return a MenuTitle depending on if we have the Fluent module enabled, and the
+     * current selected locale.
+     * 
+     * It is also obviously contingent on each of the MenuTitle_<locale> fields 
+     * having been configured correctly.
+     * 
+     * This method obviously _only_ deals with the MenuTitle_<locale> field. It is
+     * therefore not at all DRY in the sense that there is no answer to the following
+     * question: What do we do for other properties-as-fields, configured and 
+     * translated via Fluent? 
+     * 
+     * @return string
+     */
+    public function MenuTitle() {
+        if($this->hasFluent()) {
+            $localeCurrent = Fluent::current_locale();
+            $fieldCurrent = 'MenuTitle_' . $localeCurrent;
+            if(isset($this->$fieldCurrent) && $title = $this->$fieldCurrent) {
+                return $title;
+            }
+        }
+
+        return $this->MenuTitle;
+    }
+
 }

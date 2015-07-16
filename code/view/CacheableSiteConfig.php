@@ -1,5 +1,13 @@
 <?php
 /**
+ * 
+ * Object-cached representation of a SilverStripe {@link SiteConfig} object.
+ * 
+ * Warning: The API surface of a cacheable object differs from its SilverStripe
+ * core counterpart. While developers have the opportunity to fine-tune what properties
+ * and methods are cached via YML config (See README) do not rely on core methods
+ * always being callable.
+ * 
  * @author Deviate Ltd 2014-2015 http://www.deviate.net.nz
  * @package silverstripe-cachable
  */
