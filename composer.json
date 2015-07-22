@@ -24,7 +24,7 @@
     "require": {
         "silverstripe/framework": ">=3.1",
         "silverstripe/cms": ">=3.1",
-        "silverstripe/queuedjobs": "2.3.1"
+        "silverstripe/queuedjobs": ">=2.3.1"
     },
     "minimum-stability": "dev"
 }
