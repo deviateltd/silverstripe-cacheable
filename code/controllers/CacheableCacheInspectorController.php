@@ -64,7 +64,7 @@ class CacheableCacheInspectorController extends Controller {
         switch($backend) {            
             // File backend
             case 'File':
-                $fileList = ArrayList::create($this->getCacheFiles());
+                $fileList = ArrayList::create(Cacheable::get_cache_files());
                 $backendData['FileTotal'] = $fileList->count();
                 $backendData['FileList'] = $fileList;
                 $backendData['FileCacheDir'] = CACHEABLE_STORE_DIR;
@@ -155,33 +155,6 @@ class CacheableCacheInspectorController extends Controller {
     
     /**
      * 
-     * Build an array of object-cache files from the filesystem.
-     * 
-     * @return array
-     */
-    private function getCacheFiles() {
-        $files = array();
-        foreach(scandir(CACHEABLE_STORE_DIR) as $file) {
-            // Ignore hidden files
-            if(strstr($file, '.', true) !== '') {
-                $name = CACHEABLE_STORE_DIR . DIRECTORY_SEPARATOR . $file;
-                if(file_exists($name)) {
-                    $size = filesize($name);
-                    $date = date('Y-m-d H:i:s', filemtime($name));
-                    $files[$name] = ArrayData::create(array(
-                        'Line' => $size . "\t" . $date . "\t" . $file,
-                        'Size' => $size,
-                        'Date' => $date
-                    ));
-                }
-            }
-        }
-        
-        return $files;
-    }
-    
-    /**
-     * 
      * Generate output that indicates the health of the cache.
      * 
      * @param string $stage
@@ -216,7 +189,7 @@ class CacheableCacheInspectorController extends Controller {
      */
     private function getCacheLastUpdated($backend = 'file') {
         if($backend === 'file') {
-            if($files = $this->getCacheFiles()) {
+            if($files = Cacheable::get_cache_files()) {
                 $list = ArrayList::create($files)->sort('Date', 'DESC');
                 return $list->first()->Date;
             }
@@ -235,7 +208,7 @@ class CacheableCacheInspectorController extends Controller {
     private function getCacheSize($backend = 'file') {
         $size = 0;
         if($backend === 'file') {
-            if($files = $this->getCacheFiles()) {
+            if($files = Cacheable::get_cache_files()) {
                 foreach($files as $file) {
                     $size += $file->Size;
                 }

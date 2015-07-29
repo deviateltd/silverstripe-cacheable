@@ -225,6 +225,33 @@ class Cacheable extends SiteTreeExtension {
     
     /**
      * 
+     * Build an array of object-cache files from the filesystem.
+     * 
+     * @return array
+     */
+    public static function get_cache_files() {
+        $files = array();
+        foreach(scandir(CACHEABLE_STORE_DIR) as $file) {
+            // Ignore hidden files
+            if(strstr($file, '.', true) !== '') {
+                $name = CACHEABLE_STORE_DIR . DIRECTORY_SEPARATOR . $file;
+                if(file_exists($name)) {
+                    $size = filesize($name);
+                    $date = date('Y-m-d H:i:s', filemtime($name));
+                    $files[$name] = ArrayData::create(array(
+                        'Line' => $size . "\t" . $date . "\t" . $file,
+                        'Size' => $size,
+                        'Date' => $date
+                    ));
+                }
+            }
+        }
+        
+        return $files;
+    }
+    
+    /**
+     * 
      * Current module default is to build the cache if it's not present via
      * a browser request after the "first user pays" pattern. This may not be 
      * desirable on sites with 1000s of page objects.
