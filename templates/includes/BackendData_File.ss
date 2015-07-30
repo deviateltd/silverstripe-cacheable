@@ -3,6 +3,7 @@
     <li>Total files: $FileTotal</li>
     <li>Last updated: $CacheLastEdited</li>
     <li>Size on disk: $FileSizeOnDisk</li>
+    <li>PHP Memory Limit: $PHPMemoryLimit</li>
 </ul>
 <ul>
     <% loop $FileList %>

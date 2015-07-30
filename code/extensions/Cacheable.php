@@ -233,7 +233,7 @@ class Cacheable extends SiteTreeExtension {
         $files = array();
         foreach(scandir(CACHEABLE_STORE_DIR) as $file) {
             // Ignore hidden files
-            if(strstr($file, '.', true) !== '') {
+            if(!preg_match("#^(\.|web\.)#", $file)) {
                 $name = CACHEABLE_STORE_DIR . DIRECTORY_SEPARATOR . $file;
                 if(file_exists($name)) {
                     $size = filesize($name);

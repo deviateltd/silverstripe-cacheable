@@ -60,6 +60,7 @@ class CacheableCacheInspectorController extends Controller {
      */
     public function inspect() {
         $backend = ucfirst(CacheableConfig::current_cache_mode());
+        $backendData['PHPMemoryLimit'] = ini_get('memory_limit');
         
         switch($backend) {            
             // File backend
