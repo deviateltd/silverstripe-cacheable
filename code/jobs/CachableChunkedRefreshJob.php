@@ -158,7 +158,7 @@ class CachableChunkedRefreshJob extends AbstractQueuedJob implements QueuedJob {
      */
     public function getTitle() {
         $title = 'Cacheable refresh'
-                . ' ' . $this->chunkSize() . ' objects.'
+                . ' ' . $this->chunkSize() . ' object(s).'
                 . ($this->getSubsiteID() ? ' (SubsiteID ' . $this->getSubsiteID() . ')' : '')
                 . ' ' . $this->getStage();
         

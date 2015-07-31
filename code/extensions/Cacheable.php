@@ -110,6 +110,9 @@ class Cacheable extends SiteTreeExtension {
      * @return void
      */
     public function refreshPageCache($modes, $forceRemoval = false) {
+        // Increase memory to max-allowable
+        CacheableConfig::configure_memory_limit();
+        
         //get the unlocked cached Navigation first
         $siteConfig = $this->owner->getSiteConfig();
         if(!$siteConfig->exists()) {
@@ -143,6 +146,9 @@ class Cacheable extends SiteTreeExtension {
      * @return void
      */
     public function removePageCache($modes, $forceRemoval = true) {
+        // Increase memory to max-allowable
+        CacheableConfig::configure_memory_limit();
+        
         $siteConfig = $this->owner->getSiteConfig();
         if(!$siteConfig->exists()) {
             $siteConfig = SiteConfig::current_site_config();
@@ -626,6 +632,7 @@ class CacheableConfig {
             Config::inst()->update('Filesystem', 'sync_blacklisted_patterns', array($pattern));
         }
     }
+   
 }
 
 /**
