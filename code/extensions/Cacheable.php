@@ -425,10 +425,7 @@ class CacheableConfig {
             mkdir($cacheable_store_dir, 0775);
         }
         
-        $storeIsOk = (
-            file_exists($cacheable_store_dir) &&
-            is_writable($cacheable_store_dir)
-        );
+        $storeIsOk = file_exists($cacheable_store_dir);
         if(!$storeIsOk) {
             return false;
         }
