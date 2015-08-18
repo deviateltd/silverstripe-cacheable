@@ -90,6 +90,12 @@ class CacheableNavigation_Rebuild extends BuildTask {
             foreach($siteConfigs as $config) {
                 $service = new CacheableNavigationService($mode, $config);
                 $service->refreshCachedConfig();
+                echo 'Caching: SiteConfig object '
+                    . trim($config->ID)
+                    . ' (' . $config->Title
+                    . ') with mode: '
+                    . $mode
+                    . self::new_line(2);
                 
                 if(class_exists('Subsite')) {
                     $pages = DataObject::get("Page", "SubsiteID = '" . $config->SubsiteID . "'");
