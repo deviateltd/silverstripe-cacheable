@@ -371,6 +371,10 @@ class CacheableNavigationService {
     public function clearInternalCache() {
         $this->_cached = null;
     }
+
+    public function clearCacheableFrontend() {
+        $this->_cacheable_frontend = null;
+    }
     
     /**
      * 
