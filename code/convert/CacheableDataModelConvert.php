@@ -34,7 +34,7 @@ class CacheableDataModelConvert extends Convert {
              * Running tests inside a project with its own YML config for 
              * cacheable_fields and cacheable_functions will fail if we don't check first
              */
-            if(method_exists($model, $function)) {
+            if($model->hasMethod($function)) {
                 $cacheable->__set($function, $model->$function());
             }
         }
