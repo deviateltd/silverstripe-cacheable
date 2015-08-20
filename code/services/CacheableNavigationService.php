@@ -146,12 +146,14 @@ class CacheableNavigationService {
                     'automatic_serialization'=>true
                 ));
                 $this->_cacheable_frontend->save($entity, $id, array(self::get_default_cache_tag()));
+                $this->_cached = $this->_cacheable_frontend->load($id);
             } else {
                 $this->_cacheable_frontend = SS_Cache::factory($for, 'Class', array(
                     'lifetime'=>null,
                     'cached_entity'=>$cached,
                     'automatic_serialization'=>true
                 ));
+                $this->cached = $cached;
             }
        }
         
