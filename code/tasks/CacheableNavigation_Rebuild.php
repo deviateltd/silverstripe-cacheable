@@ -158,6 +158,7 @@ class CacheableNavigation_Rebuild extends BuildTask {
                                 echo 'Caching fails: ' . trim($page->Title) . ' (' . $percentComplete . ') ' . self::new_line();
                             }
                         }
+                        $page->flushCache();
                     }
                 }
                 
