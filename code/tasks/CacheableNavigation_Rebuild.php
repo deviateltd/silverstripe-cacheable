@@ -36,7 +36,7 @@ class CacheableNavigation_Rebuild extends BuildTask {
      * 
      * @var number
      */
-    public static $chunk_divisor = 100;
+    public static $chunk_divisor = 20;
     
     /**
      *
@@ -89,13 +89,23 @@ class CacheableNavigation_Rebuild extends BuildTask {
             
             foreach($siteConfigs as $config) {
                 $service = new CacheableNavigationService($mode, $config);
-                $service->refreshCachedConfig();
-                echo 'Caching: SiteConfig object '
-                    . trim($config->ID)
-                    . ' (' . $config->Title
-                    . ') with mode: '
-                    . $mode
-                    . self::new_line(2);
+
+                if($service->refreshCachedConfig()){
+                    echo 'Caching: SiteConfig object '
+                        . trim($config->ID)
+                        . ' (' . $config->Title
+                        . ') with mode: '
+                        . $mode
+                        . self::new_line(2);
+                }else{
+                    echo 'Caching fails: SiteConfig object '
+                        . trim($config->ID)
+                        . ' (' . $config->Title
+                        . ') with mode: '
+                        . $mode
+                        . self::new_line(2);
+                }
+
                 
                 if(class_exists('Subsite')) {
                     $pages = DataObject::get("Page", "SubsiteID = '" . $config->SubsiteID . "'");
@@ -141,9 +151,12 @@ class CacheableNavigation_Rebuild extends BuildTask {
                         // Default to non-chunking if no queuedjobs or script instructed to skip queuing
                         } else {
                             $percentComplete = $this->percentageComplete($i, $pageCount);
-                            echo 'Caching: ' . trim($page->Title) . ' (' . $percentComplete . ') ' . self::new_line();
                             $service->set_model($page);
-                            $service->refreshCachedPage(true);
+                            if($service->refreshCachedPage(true)) {
+                                echo 'Caching: ' . trim($page->Title) . ' (' . $percentComplete . ') ' . self::new_line();
+                            } else {
+                                echo 'Caching fails: ' . trim($page->Title) . ' (' . $percentComplete . ') ' . self::new_line();
+                            }
                         }
                     }
                 }
