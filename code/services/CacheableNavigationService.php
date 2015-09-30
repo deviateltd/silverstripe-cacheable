@@ -168,17 +168,8 @@ class CacheableNavigationService {
      *                  or {@link Zend_Cache_Core::save()} fail for any reason.
      */
     public function refreshCachedConfig() {
+        $this->applySubsiteTheme();
         $config = $this->get_config();
-        if(class_exists('Subsite')) {
-            if($config->SubsiteID) {
-                $subsite = DataObject::get_by_id("Subsite", $config->SubsiteID);
-                if($subsite && $subsite->exists() && $subsite->Theme) {
-                    Config::inst()->update("SSViewer", "theme", $subsite->Theme);
-                }
-            }
-        }
-
-
         $cacheable = CacheableDataModelConvert::model2cacheable($config);
         // manipulating the CachedNavigation for its cached SiteConfig
         $frontend = $this->getCacheableFrontEnd();
@@ -198,6 +189,23 @@ class CacheableNavigationService {
                     $id, 
                     array(self::get_default_cache_tag())
                 );
+    }
+
+    /**
+     * Apply the theme configure by the Subsite
+     *
+     * @return null
+     */
+    private function applySubsiteTheme(){
+        if(class_exists('Subsite')) {
+            $config = $this->get_config();
+            if($config->SubsiteID) {
+                $subsite = DataObject::get_by_id("Subsite", $config->SubsiteID);
+                if($subsite && $subsite->exists() && $subsite->Theme) {
+                    Config::inst()->update("SSViewer", "theme", $subsite->Theme);
+                }
+            }
+        }
     }
 
     /**
