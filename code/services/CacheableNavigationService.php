@@ -192,11 +192,12 @@ class CacheableNavigationService {
     }
 
     /**
-     * Apply the theme configure by the Subsite
+     *
+     * Apply the theme configured by the Subsite
      *
      * @return null
      */
-    private function applySubsiteTheme(){
+    private function applySubsiteTheme() {
         if(class_exists('Subsite')) {
             $config = $this->get_config();
             if($config->SubsiteID) {
