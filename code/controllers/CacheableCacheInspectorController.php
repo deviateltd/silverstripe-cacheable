@@ -27,6 +27,18 @@ class CacheableCacheInspectorController extends Controller {
      * @var DataList
      */
     protected $_dbObjects = array();
+
+    /**
+     *
+     * @var array of object IDs that cached.
+     */
+    protected $_cachedIDs = array();
+
+    /**
+     *
+     * @var array of object IDs from DB
+     */
+    protected $_dbObjectIDs = array();
     
     /**
      * 
@@ -124,9 +136,14 @@ class CacheableCacheInspectorController extends Controller {
         if($cache && $siteMap = $cache->get_site_map()) {
             // For reasons unknown, items appear in object-cache with NULL properties
             $cachedSiteTree = ArrayList::create($siteMap)->filterByCallback(function($item) {
-                return !is_null($item->ParentID);
+                if(!is_null($item->ParentID)) {
+                    // push the item ID to the _cachedIDs array for comparison later
+                    $this->_cachedIDs[] = $item->ID;
+                    return true;
+                } else {
+                    return false;
+                }
             });
-            
             return $cachedSiteTree->count();
         }
         
@@ -148,6 +165,8 @@ class CacheableCacheInspectorController extends Controller {
         if(!$this->_dbObjects || !isset($this->_dbObjects[$stage])) {
             if($list = DataObject::get($className)) {
                 $this->_dbObjects[$stage] = $list;
+                //store all object IDs into an array for comparison later
+                $this->_dbObjectIDs[$stage] = $list->map("ID", "ID")->toArray();
             }
         }
         
@@ -175,8 +194,17 @@ class CacheableCacheInspectorController extends Controller {
         }
         
         $comparison .= ' ' . $className . ' (' . $stage . ')';
+
+        $missed = "";
+        if(isset($this->_dbObjectIDs[$stage])) {
+            //array_diff will get all IDs that missed from cache on $stage
+            $cacheMissings = array_diff($this->_dbObjectIDs[$stage], $this->_cachedIDs);
+            if(!empty($cacheMissings)) {
+                $missed = "[".implode(", ", $cacheMissings)."]";
+            }
+        }
         
-        return ArrayData::create(array('Status' => $comparison));
+        return ArrayData::create(array('Status' => $comparison, 'Missed'=>$missed));
     }
     
     /**
