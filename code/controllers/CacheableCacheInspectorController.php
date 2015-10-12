@@ -30,7 +30,7 @@ class CacheableCacheInspectorController extends Controller {
 
     /**
      *
-     * @var array of object IDs that cached.
+     * @var array of IDs cached.
      */
     protected $_cachedIDs = array();
 
@@ -133,17 +133,22 @@ class CacheableCacheInspectorController extends Controller {
         $conf = SiteConfig::current_site_config();
         $service = new CacheableNavigationService($stage, $conf);
         $cache = $service->getObjectCache();
+        $cachedIDs = $this->_cachedIDs;
         if($cache && $siteMap = $cache->get_site_map()) {
             // For reasons unknown, items appear in object-cache with NULL properties
-            $cachedSiteTree = ArrayList::create($siteMap)->filterByCallback(function($item) {
-                if(!is_null($item->ParentID)) {
-                    // push the item ID to the _cachedIDs array for comparison later
-                    $this->_cachedIDs[] = $item->ID;
-                    return true;
-                } else {
+            $cachedSiteTree = ArrayList::create($siteMap)->filterByCallback(function($item) use (&$cachedIDs) {
+                try {
+                    if (!is_null($item->ParentID)) {
+                        // push the item ID to the _cachedIDs array for comparison later
+                        $cachedIDs[]= $item->ID;
+                        return true;
+                    }
                     return false;
+                } catch(Exception $e) {
+                    echo ($e->getMessage());
                 }
             });
+            $this->_cachedIDs = $cachedIDs;
             return $cachedSiteTree->count();
         }
         
@@ -195,7 +200,7 @@ class CacheableCacheInspectorController extends Controller {
         
         $comparison .= ' ' . $className . ' (' . $stage . ')';
 
-        $missed = "";
+        $missed = '';
         if(isset($this->_dbObjectIDs[$stage])) {
             //array_diff will get all IDs that missed from cache on $stage
             $cacheMissings = array_diff($this->_dbObjectIDs[$stage], $this->_cachedIDs);
@@ -204,7 +209,7 @@ class CacheableCacheInspectorController extends Controller {
             }
         }
         
-        return ArrayData::create(array('Status' => $comparison, 'Missed'=>$missed));
+        return ArrayData::create(array('Status' => $comparison, 'Missed' => $missed));
     }
     
     /**
