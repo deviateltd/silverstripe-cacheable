@@ -29,7 +29,7 @@
             <h2>Cache status: (Cache / DB)</h2>
             <ul>
                 <% loop $StatusList %>
-                <li><code>$Status</code></li>
+                <li><code>$Status<% if $Missed %>. IDs that Caches missed: $Missed<% end_if %></code></li>
                 <% end_loop %>
             </ul>
             $BackEndDataList
