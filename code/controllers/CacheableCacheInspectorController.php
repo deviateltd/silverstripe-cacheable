@@ -140,7 +140,7 @@ class CacheableCacheInspectorController extends Controller {
                 try {
                     if (!is_null($item->ParentID)) {
                         // push the item ID to the _cachedIDs array for comparison later
-                        $cachedIDs[]= $item->ID;
+                        $cachedIDs[] = $item->ID;
                         return true;
                     }
                     return false;
