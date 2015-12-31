@@ -4,14 +4,16 @@
  * @author Deviate Ltd 2014-2015 http://www.deviate.net.nz
  * @package silverstripe-cachable
  */
-class CacheableTest extends SapphireTest {
+class CacheableTest extends SapphireTest
+{
     
-    public function testIsFlush() {
+    public function testIsFlush()
+    {
         $controller = new Controller();
         $req = new SS_HTTPRequest('GET', '/', array('flush' => 1));
         $controller->setRequest($req);
         
-        $this->assertTrue(Cacheable::is_flush($controller));        
+        $this->assertTrue(Cacheable::is_flush($controller));
         
         $req = new SS_HTTPRequest('GET', '/', array('flush' => 'all'));
         $controller->setRequest($req);
@@ -23,6 +25,4 @@ class CacheableTest extends SapphireTest {
         
         $this->assertFalse(Cacheable::is_flush($controller));
     }
-    
 }
-

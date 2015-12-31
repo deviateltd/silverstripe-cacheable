@@ -24,7 +24,8 @@
  * @todo Rename task to better suit the module's new name
  * @todo Cache filled using {@link Zend_Cache_Core::getFillingPercentage()}.
  */
-class CacheableNavigation_Rebuild extends BuildTask {
+class CacheableNavigation_Rebuild extends BuildTask
+{
     
     /**
      * 
@@ -53,7 +54,8 @@ class CacheableNavigation_Rebuild extends BuildTask {
      * @param SS_HTTPRequest $request
      * @return void
      */
-    public function run($request) {
+    public function run($request)
+    {
         // Increase memory to max-allowable
         CacheableConfig::configure_memory_limit();
         
@@ -65,7 +67,7 @@ class CacheableNavigation_Rebuild extends BuildTask {
          * Restrict cache rebuild to the given stage - useful for debugging or
          * "Poor Man's" chunking.
          */
-        if($paramStage = $request->getVar('Stage')) {
+        if ($paramStage = $request->getVar('Stage')) {
             $stage_mode_mapping = array(
                 ucfirst($paramStage) => strtolower($paramStage)
             );
@@ -79,25 +81,25 @@ class CacheableNavigation_Rebuild extends BuildTask {
 
         $canQueue = interface_exists('QueuedJob');
         $siteConfigs = DataObject::get('SiteConfig');
-        foreach($stage_mode_mapping as $stage => $mode) {
+        foreach ($stage_mode_mapping as $stage => $mode) {
             Versioned::set_reading_mode('Stage.' . $stage);
-            if(class_exists('Subsite')) {
+            if (class_exists('Subsite')) {
                 Subsite::disable_subsite_filter(true);
                 Config::inst()->update("CacheableSiteConfig", 'cacheable_fields', array('SubsiteID'));
                 Config::inst()->update("CacheableSiteTree", 'cacheable_fields', array('SubsiteID'));
             }
             
-            foreach($siteConfigs as $config) {
+            foreach ($siteConfigs as $config) {
                 $service = new CacheableNavigationService($mode, $config);
 
-                if($service->refreshCachedConfig()){
+                if ($service->refreshCachedConfig()) {
                     echo 'Caching: SiteConfig object '
                         . trim($config->ID)
                         . ' (' . $config->Title
                         . ') with mode: '
                         . $mode
                         . self::new_line(2);
-                }else{
+                } else {
                     echo 'Caching fails: SiteConfig object '
                         . trim($config->ID)
                         . ' (' . $config->Title
@@ -107,7 +109,7 @@ class CacheableNavigation_Rebuild extends BuildTask {
                 }
 
                 
-                if(class_exists('Subsite')) {
+                if (class_exists('Subsite')) {
                     $pages = DataObject::get("Page", "SubsiteID = '" . $config->SubsiteID . "'");
                 } else {
                     $pages = DataObject::get("Page");
@@ -124,14 +126,14 @@ class CacheableNavigation_Rebuild extends BuildTask {
                  */
                 $lowPageCount = (self::$chunk_divisor > $pageCount);
                 $doQueue = ($canQueue && !$skipQueue && !$lowPageCount);
-                if($pageCount) {
+                if ($pageCount) {
                     $i = 0;
                     $chunkNum = 0;
                     $chunk = array();
-                    foreach($pages as $page) {
+                    foreach ($pages as $page) {
                         $i++;
                         // If QueuedJobs exists and isn't user-disabled: Chunk
-                        if($doQueue) {
+                        if ($doQueue) {
                             // Start building a chunk of pages to be refreshed
                             $chunk[] = $page;
                             $chunkSize = count($chunk);
@@ -142,7 +144,7 @@ class CacheableNavigation_Rebuild extends BuildTask {
                              * - Remaining object count equals no. objects in current $chunk
                              */
                             $doChunking = $this->chunkForQueue($pageCount, $chunkSize, $i);
-                            if($doChunking) {
+                            if ($doChunking) {
                                 $chunkNum++;
                                 $this->queue($service, $chunk, $stage, $config->SubsiteID);
                                 echo "Queued chunk #" . $chunkNum . ' (' . $chunkSize . ' objects).' . self::new_line();
@@ -152,7 +154,7 @@ class CacheableNavigation_Rebuild extends BuildTask {
                         } else {
                             $percentComplete = $this->percentageComplete($i, $pageCount);
                             $service->set_model($page);
-                            if($service->refreshCachedPage(true)) {
+                            if ($service->refreshCachedPage(true)) {
                                 echo 'Caching: ' . trim($page->Title) . ' (' . $percentComplete . ') ' . self::new_line();
                             } else {
                                 echo 'Caching fails: ' . trim($page->Title) . ' (' . $percentComplete . ') ' . self::new_line();
@@ -166,7 +168,7 @@ class CacheableNavigation_Rebuild extends BuildTask {
                 
                 // Completion message
                 $msg = self::new_line() . $pageCount . ' ' . $stage . ' pages in subsite ' . $config->ID;
-                if($doQueue) {
+                if ($doQueue) {
                     $msg .= ' queued for caching.' . self::new_line();
                 } else {
                     $msg .= ' objects cached.' . self::new_line();
@@ -174,7 +176,7 @@ class CacheableNavigation_Rebuild extends BuildTask {
                 echo $msg . self::new_line();
             }
             
-            if(class_exists('Subsite')){
+            if (class_exists('Subsite')) {
                 Subsite::disable_subsite_filter(false);
             }
         }
@@ -196,7 +198,8 @@ class CacheableNavigation_Rebuild extends BuildTask {
      * @param integer $count
      * @return boolean
      */
-    public function chunkForQueue($pageCount, $chunkSize, $count) {
+    public function chunkForQueue($pageCount, $chunkSize, $count)
+    {
         // The no. items-to-cache in full-chunks
         $totalFullChunkCount = ((int)floor(round($pageCount / self::$chunk_divisor, 1))) * self::$chunk_divisor;
         $queueFullChunk = ($chunkSize === self::$chunk_divisor);
@@ -214,7 +217,8 @@ class CacheableNavigation_Rebuild extends BuildTask {
      * @param number $total
      * @return string
      */
-    private function percentageComplete($count, $total) {
+    private function percentageComplete($count, $total)
+    {
         $calc = (((int)$count / (int)$total) * 100);
         return round($calc, 1) . '%';
     }
@@ -225,7 +229,8 @@ class CacheableNavigation_Rebuild extends BuildTask {
      * 
      * @return number
      */
-    private function memory() {
+    private function memory()
+    {
         return memory_get_peak_usage(true) / 1024 / 1024;
     }
     
@@ -237,7 +242,8 @@ class CacheableNavigation_Rebuild extends BuildTask {
      * @param number $mul
      * @return string
      */
-    public static function new_line($mul = 1) {
+    public static function new_line($mul = 1)
+    {
         $newLine = Director::is_cli() ? PHP_EOL : "<br />";
         return str_repeat($newLine, $mul);
     }
@@ -254,7 +260,8 @@ class CacheableNavigation_Rebuild extends BuildTask {
      * @param number $subsiteID
      * @return number $jobDescriptorID (Return value not used)
      */
-    public function queue(CachableNavigationService $service, $chunk, $stage, $subsiteID) {
+    public function queue(CachableNavigationService $service, $chunk, $stage, $subsiteID)
+    {
         // We only need to do this during queueing
         $service->clearInternalCache();
         $job = new CachableChunkedRefreshJob($service, $chunk, $stage, $subsiteID);
@@ -274,12 +281,13 @@ class CacheableNavigation_Rebuild extends BuildTask {
      *                                  and let the user know        
      * @return void
      */
-    public function showConfig($totalTime, $request, $lowCount = false) {
+    public function showConfig($totalTime, $request, $lowCount = false)
+    {
         $skipQueue = ($request->getVar('SkipQueue') && $request->getVar('SkipQueue') == 1);
         
         $queueOn = (interface_exists('QueuedJob') ? 'On' : 'Off');
         $queueSkipped = ($skipQueue ? ' (Skipped: User instruction)' : '');
-        if($lowCount && !$skipQueue) {
+        if ($lowCount && !$skipQueue) {
             $queueSkipped = ' (Skipped: Low page count)';
         }
         

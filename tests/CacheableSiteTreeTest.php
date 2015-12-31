@@ -4,7 +4,8 @@
  * @author Deviate Ltd 2014-2015 http://www.deviate.net.nz
  * @package silverstripe-cachable
  */
-class CacheableSiteTreeTest extends SapphireTest {
+class CacheableSiteTreeTest extends SapphireTest
+{
     
     /**
      * 
@@ -15,12 +16,13 @@ class CacheableSiteTreeTest extends SapphireTest {
     /**
      * Cleanup after ourselves
      */
-    public function setUp() {
+    public function setUp()
+    {
         parent::setUp();
         
         // Cleanup our test-only caches
         SS_Cache::factory(CACHEABLE_STORE_FOR)->clean(
-            Zend_Cache::CLEANING_MODE_MATCHING_TAG, 
+            Zend_Cache::CLEANING_MODE_MATCHING_TAG,
             array(CACHEABLE_STORE_TAG_DEFAULT_TEST)
         );
     }
@@ -34,7 +36,8 @@ class CacheableSiteTreeTest extends SapphireTest {
      *  - It doesn't directly exercise {@link CacheableSiteTree::removeChild()}.
      *  - removeChild() is called while populating/updating the object-cache by {@link CacheableNavigationService::refreshCachedPage()}
      */
-    public function testRemoveChild() {
+    public function testRemoveChild()
+    {
         $config = $this->objFromFixture('SiteConfig', 'default');
         $parent = $this->objFromFixture('SiteTree', 'sitetreetest-page-1');
         $children = $parent->Children()->toArray();
@@ -42,7 +45,7 @@ class CacheableSiteTreeTest extends SapphireTest {
         
         // Fake a rebuild task - Populate the object-cache with our fixture data
         $i = 0;
-        foreach($models as $model) {
+        foreach ($models as $model) {
             $i++;
             $varKey = "page" . $i;
             $$varKey = $model;
@@ -68,7 +71,7 @@ class CacheableSiteTreeTest extends SapphireTest {
         // Update the object-cache with "CMS updated" data
         $service = new CacheableNavigationService('Live', $config, $page2);
         $service->refreshCachedPage(false); // Don't unset child items. Re-use array key.
-        
+
         // Re-fetch the cache
         $objCache = $service->getObjectCache();
         $siteMap = $objCache->get_site_map();
@@ -84,14 +87,15 @@ class CacheableSiteTreeTest extends SapphireTest {
     /**
      * Ensure with and without filters, we get expected output
      */
-    public function testGetChildren() {
+    public function testGetChildren()
+    {
         $config = $this->objFromFixture('SiteConfig', 'default');
         $parent = $this->objFromFixture('SiteTree', 'sitetreetest-page-1');
         $children = $parent->Children()->toArray();
         $models = array_merge(array($parent), $children);
         
         // Fake a rebuild task - Populate the object-cache with our fixture data
-        foreach($models as $model) {
+        foreach ($models as $model) {
             $service = new CacheableNavigationService('Live', $config, $model);
             $service->refreshCachedPage();
         }
@@ -145,8 +149,5 @@ class CacheableSiteTreeTest extends SapphireTest {
         
         $children = $siteMap[1]->getChildren(false, array('Dummy' => null));
         $this->assertEquals(2, $children->count());
-        
     }
-    
 }
-

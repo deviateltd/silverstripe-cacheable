@@ -10,7 +10,8 @@
  * @author Deviate Ltd 2014-2015 http://www.deviate.net.nz
  * @package silverstripe-cachable
  */
-class CachableChunkedRefreshJobStorageService {
+class CachableChunkedRefreshJobStorageService
+{
 
     /**
      * 
@@ -28,7 +29,7 @@ class CachableChunkedRefreshJobStorageService {
      * 
      * @return void
      */
-    public function __construct() {
+    public function __construct()
+    {
     }
-    
 }

@@ -15,7 +15,8 @@
  * @see {@link CacheableNavigation_Rebuild}.
  * @todo Rename task to better suit the module's new name
  */
-class CacheableNavigation_Clean extends BuildTask {
+class CacheableNavigation_Clean extends BuildTask
+{
     
     /**
      *
@@ -27,7 +28,8 @@ class CacheableNavigation_Clean extends BuildTask {
      * 
      * @param SS_HTTPRequest $request
      */
-    public function run($request) {
+    public function run($request)
+    {
         $newLine = CacheableNavigation_Rebuild::new_line();
         
         SS_Cache::pick_backend(CACHEABLE_STORE_NAME, CACHEABLE_STORE_FOR, CACHEABLE_STORE_WEIGHT);

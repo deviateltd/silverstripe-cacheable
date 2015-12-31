@@ -4,9 +4,11 @@
  * @author Deviate Ltd 2014-2015 http://www.deviate.net.nz
  * @package silverstripe-cachable
  */
-class CacheableConfigTest extends SapphireTest {
+class CacheableConfigTest extends SapphireTest
+{
     
-    public function testCacheDirPath() {
+    public function testCacheDirPath()
+    {
         // Default:
         Config::inst()->remove('CacheableConfig', 'alt_cache_dir');
         $this->assertEquals(TEMP_FOLDER . '/cacheable', CacheableConfig::cache_dir_path());
@@ -29,6 +31,4 @@ class CacheableConfigTest extends SapphireTest {
         Config::inst()->update('CacheableConfig', 'alt_cache_dir', 'foo/bar/');
         $this->assertEquals(ASSETS_PATH . '/_foo/bar/cacheable', CacheableConfig::cache_dir_path());
     }
-    
 }
-
