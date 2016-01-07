@@ -6,7 +6,8 @@
  * @todo have tests run in all possible cache-backends. Defaults to 'File' at
  * present.
  */
-class CacheableNavigationServiceTest extends SapphireTest {
+class CacheableNavigationServiceTest extends SapphireTest
+{
     
     /**
      * 
@@ -17,12 +18,13 @@ class CacheableNavigationServiceTest extends SapphireTest {
     /**
      * Cleanup
      */
-    public function setUp() {
+    public function setUp()
+    {
         parent::setUp();
         
         // Cleanup our test-only caches
         SS_Cache::factory(CACHEABLE_STORE_FOR)->clean(
-            Zend_Cache::CLEANING_MODE_MATCHING_TAG, 
+            Zend_Cache::CLEANING_MODE_MATCHING_TAG,
             array(CACHEABLE_STORE_TAG_DEFAULT_TEST)
         );
     }
@@ -30,7 +32,8 @@ class CacheableNavigationServiceTest extends SapphireTest {
     /**
      * 
      */
-    public function testRefreshCachedPage() {
+    public function testRefreshCachedPage()
+    {
         $config = $this->objFromFixture('SiteConfig', 'default');
         $model = $this->objFromFixture('SiteTree', 'servicetest-page-1');
         $service = new CacheableNavigationService('Live', $config, $model);
@@ -53,7 +56,8 @@ class CacheableNavigationServiceTest extends SapphireTest {
     /**
      * 
      */
-    public function testRemoveCachedPage() {
+    public function testRemoveCachedPage()
+    {
         $model = $this->objFromFixture('SiteTree', 'servicetest-page-1');
         $service = new CacheableNavigationService('Live', null, $model);
         
@@ -80,7 +84,8 @@ class CacheableNavigationServiceTest extends SapphireTest {
     /**
      * 
      */
-    public function testRefreshCachedConfig() {
+    public function testRefreshCachedConfig()
+    {
         $config = $this->objFromFixture('SiteConfig', 'default');
         $service = new CacheableNavigationService('Live', $config, null);
         
@@ -100,7 +105,8 @@ class CacheableNavigationServiceTest extends SapphireTest {
     /**
      * 
      */
-    public function testCompleteBuild() {
+    public function testCompleteBuild()
+    {
         $model = $this->objFromFixture('SiteTree', 'servicetest-page-1');
         $service = new CacheableNavigationService('Live', null, $model);
         
@@ -116,5 +122,4 @@ class CacheableNavigationServiceTest extends SapphireTest {
         $cachable = $service->getCacheableFrontEnd()->load($service->getIdentifier());
         $this->assertTrue($cachable->get_completed());
     }
-    
 }

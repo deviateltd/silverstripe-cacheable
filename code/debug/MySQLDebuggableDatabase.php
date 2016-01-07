@@ -6,7 +6,8 @@
  * Just allows us to visualize the reduction in SQL queries when module is
  * enabled and cache is primed.
  */
-class MySQLDebuggableDatabase extends MySQLDatabase {
+class MySQLDebuggableDatabase extends MySQLDatabase
+{
     
     /**
      * 
@@ -14,15 +15,15 @@ class MySQLDebuggableDatabase extends MySQLDatabase {
      * @param integer $errorLevel
      * @return SS_Query
      */
-    public function query($sql, $errorLevel = E_USER_ERROR) {
+    public function query($sql, $errorLevel = E_USER_ERROR)
+    {
         $query = parent::query($sql, $errorLevel);
-        if(isset($_REQUEST['showqueries']) && Director::isDev()) {
+        if (isset($_REQUEST['showqueries']) && Director::isDev()) {
             $count = 1+(int)Config::inst()->get('MySQLDebuggableDatabase', 'queries_count');
             Config::inst()->update('MySQLDebuggableDatabase', 'queries_count', $count);
-            Debug::message(PHP_EOL . 'Query Counts: ' . $count . PHP_EOL , false);
+            Debug::message(PHP_EOL . 'Query Counts: ' . $count . PHP_EOL, false);
         }
 
         return $query;
     }
-
 }

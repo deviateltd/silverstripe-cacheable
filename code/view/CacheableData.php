@@ -8,7 +8,8 @@
  * @author Deviate Ltd 2014-2015 http://www.deviate.net.nz
  * @package silverstripe-cachable
  */
-abstract class CacheableData extends ViewableData {
+abstract class CacheableData extends ViewableData
+{
 
     /**
      *
@@ -29,7 +30,8 @@ abstract class CacheableData extends ViewableData {
      * 
      * @return array
      */
-    public function get_cacheable_fields() {
+    public function get_cacheable_fields()
+    {
         return $this->config()->cacheable_fields;
     }
 
@@ -37,7 +39,8 @@ abstract class CacheableData extends ViewableData {
      * 
      * @return array
      */
-    public function get_cacheable_functions() {
+    public function get_cacheable_functions()
+    {
         return $this->config()->cacheable_functions;
     }
 
@@ -45,7 +48,8 @@ abstract class CacheableData extends ViewableData {
      * 
      * @return array
      */
-    public function CachedNavigation() {
+    public function CachedNavigation()
+    {
         return Config::inst()->get('Cacheable', '_cached_navigation');
     }
 
@@ -62,7 +66,8 @@ abstract class CacheableData extends ViewableData {
      *
      * @return boolean true if this object exists
      */
-    public function exists() {
+    public function exists()
+    {
         return (isset($this->ID) && $this->ID > 0);
     }
 
@@ -72,17 +77,18 @@ abstract class CacheableData extends ViewableData {
      * @param Member $member
      * @return mixed null|int
      */
-    public function extendedCan($methodName, $member) {
+    public function extendedCan($methodName, $member)
+    {
         $results = $this->extend($methodName, $member);
-        if($results && is_array($results)) {
+        if ($results && is_array($results)) {
             // Remove NULLs
-            $results = array_filter($results, function($v) {
+            $results = array_filter($results, function ($v) {
                 return !is_null($v);
             });
             
             // If there are any non-NULL responses, then return the lowest one of them.
             // If any explicitly deny the permission, then we don't get access
-            if($results) {
+            if ($results) {
                 return min($results);
             }
         }
@@ -94,7 +100,8 @@ abstract class CacheableData extends ViewableData {
      * 
      * @return DataObject
      */
-    public function NonCachedData() {
+    public function NonCachedData()
+    {
         return DataObject::get_by_id($this->ClassName, $this->ID);
     }
 
@@ -114,18 +121,19 @@ abstract class CacheableData extends ViewableData {
      * 
      * @return string
      */
-    public function Debug($id = null) {
-        if(!Director::isDev() || !isset($_REQUEST['showcache'])) {
+    public function Debug($id = null)
+    {
+        if (!Director::isDev() || !isset($_REQUEST['showcache'])) {
             return;
         }
 
-        if($id) {
+        if ($id) {
             $mode = strtolower($_REQUEST['showcache']);
             $conf = SiteConfig::current_site_config();
             $cacheService = new CacheableNavigationService($mode, $conf);
             $objectCache = $cacheService->getObjectCache();
             $cachedSiteTree = $objectCache->get_site_map();
-            if(isset($cachedSiteTree[$id])) {
+            if (isset($cachedSiteTree[$id])) {
                 $object = $cachedSiteTree[$id];
             } else {
                 return false;
@@ -151,7 +159,7 @@ abstract class CacheableData extends ViewableData {
         $message .= "\t<li><strong>Cached Fields:</strong>";
         $message .= "\t\t<ul>";
 
-        foreach($object->get_cacheable_fields() as $field) {
+        foreach ($object->get_cacheable_fields() as $field) {
             $message .= "\t\t\t<li>" . $field . ': ' . $object->$field . "</li>";
         }
 
@@ -160,7 +168,7 @@ abstract class CacheableData extends ViewableData {
         $message .= "\t<li><strong>Cached Functions:</strong>";
         $message .= "\t\t<ul>";
 
-        foreach($object->get_cacheable_functions() as $function) {
+        foreach ($object->get_cacheable_functions() as $function) {
             $message .= "\t\t\t<li>" . $function . '</li>';
         }
 
@@ -171,7 +179,7 @@ abstract class CacheableData extends ViewableData {
         $message .= "<h2>Child nodes of this object:</h2>";
 
         $message .= '<ol>';
-        foreach($object->getChildren() as $child) {
+        foreach ($object->getChildren() as $child) {
             $message .= "\t<li>" . $child->Title . ' (#' . $child->ID . ')</li>';
         }
         $message .= '</ol>';
@@ -183,7 +191,8 @@ abstract class CacheableData extends ViewableData {
      * 
      * @return string
      */
-    public function debug_simple() {
+    public function debug_simple()
+    {
         $message = "<h5>cacheable data: " . get_class($this) . "</h5><ul>";
         $message .= "<il>ID: " . $this->ID . ". Title: " . $this->Title . ". ClassName" . $this->ClassName . "</il>";
         $message .= "</ul>";
@@ -196,11 +205,11 @@ abstract class CacheableData extends ViewableData {
      * 
      * @return boolean
      */
-    public function hasFluent() {
+    public function hasFluent()
+    {
         return class_exists('Fluent') && (
                 Object::has_extension('SiteTree', 'FluentExtension') &&
                 Object::has_extension('SiteConfig', 'FluentExtension')
             );
     }
-
 }

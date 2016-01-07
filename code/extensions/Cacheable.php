@@ -7,7 +7,8 @@
  * @package silverstripe-cachable
  * @todo Remove capitalised template-methods
  */
-class Cacheable extends SiteTreeExtension {
+class Cacheable extends SiteTreeExtension
+{
     
     /**
      *
@@ -31,7 +32,8 @@ class Cacheable extends SiteTreeExtension {
      * At the moment we attempt to skip it if build_cache_onload is set to false 
      * in YML Config
      */
-    public function contentControllerInit($controller) {
+    public function contentControllerInit($controller)
+    {
         // Skip if flushing or the project instructs us to do so
         $skip = (self::is_flush($controller) || !self::build_cache_onload());
         $service = new CacheableNavigationService();
@@ -43,55 +45,58 @@ class Cacheable extends SiteTreeExtension {
         
         $service->set_mode($stage_mode_mapping[$currentStage]);
         $siteConfig = SiteConfig::current_site_config();
-        if(!$siteConfig->exists()) {
+        if (!$siteConfig->exists()) {
             $siteConfig = $this->owner->getSiteConfig();
         }
         
         $service->set_config($siteConfig);
 
-        if($_cached_navigation = $service->getCacheableFrontEnd()->load($service->getIdentifier())) {
-            if(!$skip && !$_cached_navigation->get_completed()) {
+        if ($_cached_navigation = $service->getCacheableFrontEnd()->load($service->getIdentifier())) {
+            if (!$skip && !$_cached_navigation->get_completed()) {
                 $service->refreshCachedConfig();
-                if(class_exists('Subsite')) {
+                if (class_exists('Subsite')) {
                     $pages = DataObject::get("Page", "\"SubsiteID\" = '".$siteConfig->SubsiteID."'");
                 } else {
                     $pages = DataObject::get("Page");
                 }
                 
-                if($pages->exists()) {
-                    foreach($pages as $page) {
+                if ($pages->exists()) {
+                    foreach ($pages as $page) {
                         $service->set_model($page);
                         $service->refreshCachedPage(true);
                     }
                 }
                 $service->completeBuild();
                 $_cached_navigation = $service->getCacheableFrontEnd()->load($service->getIdentifier());
-
             }
             
             Config::inst()->update('Cacheable', '_cached_navigation', $_cached_navigation);
         }
     }
 
-    public function onAfterWrite() {
+    public function onAfterWrite()
+    {
         $this->refreshPageCache(array(
             'Stage' => 'stage',
         ), false);
     }
 
-    public function onAfterPublish(&$original) {
+    public function onAfterPublish(&$original)
+    {
         $this->refreshPageCache(array(
             'Live' => 'live',
         ), false);
     }
 
-    public function onAfterUnpublish() {
+    public function onAfterUnpublish()
+    {
         $this->removePageCache(array(
             'Live' => 'live',
         ), false);
     }
 
-    public function onAfterDelete() {
+    public function onAfterDelete()
+    {
         $this->removePageCache(array(
             'Stage' => 'stage',
             'Live' => 'live',
@@ -109,29 +114,30 @@ class Cacheable extends SiteTreeExtension {
      * @param boolean $forceRemoval Whether to unset() children in {@link CacheableSiteTree::removeChild()}.
      * @return void
      */
-    public function refreshPageCache($modes, $forceRemoval = false) {
+    public function refreshPageCache($modes, $forceRemoval = false)
+    {
         // Increase memory to max-allowable
         CacheableConfig::configure_memory_limit();
         
         //get the unlocked cached Navigation first
         $siteConfig = $this->owner->getSiteConfig();
-        if(!$siteConfig->exists()) {
+        if (!$siteConfig->exists()) {
             $siteConfig = SiteConfig::current_site_config();
         }
         
-        foreach($modes as $stage => $mode) {
+        foreach ($modes as $stage => $mode) {
             $service = new CacheableNavigationService($mode, $siteConfig);
             $cache_frontend = $service->getCacheableFrontEnd();
             $id = $service->getIdentifier();
             $cached = $cache_frontend->load($id);
-            if($cached) {
+            if ($cached) {
                 $cached_site_config = $cached->get_site_config();
-                if(!$cached_site_config) {
+                if (!$cached_site_config) {
                     $service->refreshCachedConfig();
                 }
                 
                 $versioned = Versioned::get_one_by_stage(get_class($this->owner), $stage, "\"SiteTree\".\"ID\" = '".$this->owner->ID."'");
-                if($versioned) {
+                if ($versioned) {
                     $service->set_model($versioned);
                     $service->refreshCachedPage($forceRemoval);
                 }
@@ -145,23 +151,24 @@ class Cacheable extends SiteTreeExtension {
      * @param boolean $forceRemoval Whether to unset() children in {@link CacheableSiteTree::removeChild()}.
      * @return void
      */
-    public function removePageCache($modes, $forceRemoval = true) {
+    public function removePageCache($modes, $forceRemoval = true)
+    {
         // Increase memory to max-allowable
         CacheableConfig::configure_memory_limit();
         
         $siteConfig = $this->owner->getSiteConfig();
-        if(!$siteConfig->exists()) {
+        if (!$siteConfig->exists()) {
             $siteConfig = SiteConfig::current_site_config();
         }
         
-        foreach($modes as $stage => $mode) {
+        foreach ($modes as $stage => $mode) {
             $service = new CacheableNavigationService($mode, $siteConfig, $this->owner);
             $cache_frontend = $service->getCacheableFrontEnd();
             $id = $service->getIdentifier();
             $cached = $cache_frontend->load($id);
-            if($cached) {
+            if ($cached) {
                 $cached_site_config = $cached->get_site_config();
-                if(!$cached_site_config) {
+                if (!$cached_site_config) {
                     $service->refreshCachedConfig();
                 }
                 $service->removeCachedPage($forceRemoval);
@@ -173,10 +180,11 @@ class Cacheable extends SiteTreeExtension {
      * 
      * @return mixed ContentController | array
      */
-    public function CachedNavigation() {
-        if($this->owner->exists()) {
-            if($cachedNavigiation = Config::inst()->get('Cacheable', '_cached_navigation')) {
-                if($cachedNavigiation->isUnlocked() && $cachedNavigiation->get_completed()) {
+    public function CachedNavigation()
+    {
+        if ($this->owner->exists()) {
+            if ($cachedNavigiation = Config::inst()->get('Cacheable', '_cached_navigation')) {
+                if ($cachedNavigiation->isUnlocked() && $cachedNavigiation->get_completed()) {
                     return $cachedNavigiation;
                 }
             }
@@ -193,11 +201,12 @@ class Cacheable extends SiteTreeExtension {
      * @return mixed ContentController | array
      * @todo What to do with controller URLs other than returning the homepage's cache?
      */
-    public function CachedData() {
-        if($cachedNavigiation = Config::inst()->get('Cacheable', '_cached_navigation')) {
-            if($cachedNavigiation->isUnlocked() && $cachedNavigiation->get_completed()) {
+    public function CachedData()
+    {
+        if ($cachedNavigiation = Config::inst()->get('Cacheable', '_cached_navigation')) {
+            if ($cachedNavigiation->isUnlocked() && $cachedNavigiation->get_completed()) {
                 $site_map = $cachedNavigiation->get_site_map();
-                if(!empty($site_map[$this->owner->ID])) {
+                if (!empty($site_map[$this->owner->ID])) {
                     return $site_map[$this->owner->ID];
                 }
                 
@@ -206,10 +215,9 @@ class Cacheable extends SiteTreeExtension {
                  * and return the homepage's cache as a 'sensible' default
                  */
                 // check if isset($site_map)[1]; since there is some page created on flying, login page, search page, etc, etc
-                if(isset($site_map[1])) {
+                if (isset($site_map[1])) {
                     return $site_map[1];
                 }
-                
             }
         }
 
@@ -224,7 +232,8 @@ class Cacheable extends SiteTreeExtension {
      * @return boolean
      * @todo add tests
      */
-    public static function is_flush(Controller $controller) {
+    public static function is_flush(Controller $controller)
+    {
         $getVars = $controller->getRequest()->getVars();
         return (stristr(implode(',', array_keys($getVars)), 'flush') !== false);
     }
@@ -235,13 +244,14 @@ class Cacheable extends SiteTreeExtension {
      * 
      * @return array
      */
-    public static function get_cache_files() {
+    public static function get_cache_files()
+    {
         $files = array();
-        foreach(scandir(CACHEABLE_STORE_DIR) as $file) {
+        foreach (scandir(CACHEABLE_STORE_DIR) as $file) {
             // Ignore hidden files
-            if(!preg_match("#^(\.|web\.)#", $file)) {
+            if (!preg_match("#^(\.|web\.)#", $file)) {
                 $name = CACHEABLE_STORE_DIR . DIRECTORY_SEPARATOR . $file;
-                if(file_exists($name)) {
+                if (file_exists($name)) {
                     $size = filesize($name);
                     $date = date('Y-m-d H:i:s', filemtime($name));
                     $files[$name] = ArrayData::create(array(
@@ -265,25 +275,29 @@ class Cacheable extends SiteTreeExtension {
      * @return boolean
      * @todo Add tests
      */
-    public static function build_cache_onload() {
+    public static function build_cache_onload()
+    {
         return (bool) Config::inst()->get('CacheableConfig', 'build_cache_onload');
     }
     
     // TODO: Remove
 
     public $start_time;
-	public function StartTime() {
+    public function StartTime()
+    {
         $this->start_time = time();
         return '<br />starting at '.$this->start_time."<br />";
     }
 
     public $end_time;
-	public function EndTime() {
+    public function EndTime()
+    {
         $this->end_time = time();
         return '<br />ending at '.$this->end_time."<br />";
     }
 
-	public function TimeConsumed() {
+    public function TimeConsumed()
+    {
         return '<br />time consumed: '.((int)$this->end_time-(int)$this->start_time)."<br />";
     }
 }
@@ -295,7 +309,8 @@ class Cacheable extends SiteTreeExtension {
  * @todo Add unit tests to ensure exceptions are thrown in correct circumstances
  * @todo Move this into own class file
  */
-class CacheableConfig {
+class CacheableConfig
+{
     
     /**
      * 
@@ -328,11 +343,12 @@ class CacheableConfig {
      * @todo Make generic: Check for Suhosin memory limit. Increase memory if current allocation < Suhosin allows
      * @return void
      */
-    public static function configure_memory_limit() {
+    public static function configure_memory_limit()
+    {
         // In testing, with sites in excess of 1000 pages, we've not seen anything greater
         // than 170Mb per queued chunk-set
         $newLimit = 256; // upper limit of CWP "small" instances becuase of Suhosin
-        if(defined('CWP_ENVIRONMENT') && intval(ini_get('memory_limit')) < $newLimit) {
+        if (defined('CWP_ENVIRONMENT') && intval(ini_get('memory_limit')) < $newLimit) {
             ini_set('memory_limit', $newLimit . 'M');
             self::$ini_modified_memory_limit = $newLimit;
         }
@@ -342,8 +358,9 @@ class CacheableConfig {
      * 
      * @return boolean True if "Memcached" extension is loaded
      */
-    public static function configure_memcached() {
-        if(extension_loaded('memcached')) {
+    public static function configure_memcached()
+    {
+        if (extension_loaded('memcached')) {
             $defaultOpts = array(
                 'servers' => array(
                     'host' => '127.0.0.1',
@@ -381,7 +398,8 @@ class CacheableConfig {
      * 
      * @return boolean True if "Memcache" extension is loaded
      */
-    public static function configure_memcache() {
+    public static function configure_memcache()
+    {
         $defaultOpts = array(
             'servers' => array(
                 'host' => 'localhost',
@@ -395,7 +413,7 @@ class CacheableConfig {
                 )
             );
         
-        if(class_exists('Memcache')) {
+        if (class_exists('Memcache')) {
             // Use project-specific overridden opts, or the defaults
             $projectOpts = Config::inst()->get('CacheableConfig', 'opts');
             $serverOpts = ($projectOpts && !empty($projectOpts['memcache']['servers'])) ? $projectOpts['memcache']['servers'] : $defaultOpts['servers'];
@@ -419,14 +437,15 @@ class CacheableConfig {
      * 
      * @return boolean True if the filesystem is available to be used for caching.
      */
-    public static function configure_file() {     
+    public static function configure_file()
+    {
         $cacheable_store_dir = self::is_running_test() ? CACHEABLE_STORE_DIR_TEST : CACHEABLE_STORE_DIR;
-        if(!is_dir($cacheable_store_dir)) {
+        if (!is_dir($cacheable_store_dir)) {
             mkdir($cacheable_store_dir, 0775);
         }
         
         $storeIsOk = file_exists($cacheable_store_dir);
-        if(!$storeIsOk) {
+        if (!$storeIsOk) {
             return false;
         }
         
@@ -452,9 +471,10 @@ class CacheableConfig {
      * 
      * @return boolean True if APCu is installed as an extension and is enabled in php.ini
      */
-    public static function configure_apc() {
+    public static function configure_apc()
+    {
         $isApcEnabled = (extension_loaded('apc') && ini_get('apc.enabled') == 1);
-        if(!$isApcEnabled) {
+        if (!$isApcEnabled) {
             return false;
         }
 
@@ -470,20 +490,21 @@ class CacheableConfig {
      * @throws CacheableException
      * @return void
      */
-    public static function configure() {
+    public static function configure()
+    {
         // Project-specific YML config trumps anything in module's _config.php
-        if(!$mode = Config::inst()->get('CacheableConfig', 'cache_mode')) {
+        if (!$mode = Config::inst()->get('CacheableConfig', 'cache_mode')) {
             $mode = self::$default_mode;
         }
         
         $confMethodName = 'configure_' . $mode;
-        if(!method_exists(get_class(), $confMethodName)) {
+        if (!method_exists(get_class(), $confMethodName)) {
             throw new CacheableException('The configured cache mode: "$mode" doesn\'t exist.');
         }
         
         // Default to "File" backend if one of the modes isn't playing ball
-        if(!self::$confMethodName()) {
-            if(!self::configure_file()) {
+        if (!self::$confMethodName()) {
+            if (!self::configure_file()) {
                 throw new CacheableException('Unable to select a cache backend. Giving up.');
             }
         }
@@ -495,7 +516,8 @@ class CacheableConfig {
      * 
      * @return string
      */
-    public static function current_cache_mode() {
+    public static function current_cache_mode()
+    {
         return self::$current_mode;
     }
     
@@ -508,8 +530,9 @@ class CacheableConfig {
      * 
      * @return boolean
      */
-    public static function is_running_test() {
-        if(isset($_REQUEST['url'])) {
+    public static function is_running_test()
+    {
+        if (isset($_REQUEST['url'])) {
             return stristr($_REQUEST['url'], 'dev/tests') !== false;
         }
         
@@ -526,13 +549,14 @@ class CacheableConfig {
      * 
      * @return string
      */
-    public static function cache_dir_path() {
+    public static function cache_dir_path()
+    {
         $altCacheDir = Config::inst()->get('CacheableConfig', 'alt_cache_dir');
         $charMask = " \t\n\r\0\x0B/";
-        if($altCacheDir) {
+        if ($altCacheDir) {
             $altDir = trim($altCacheDir, $charMask);
             // If alt_cache_dir matches "cacheable", just use that
-            if($altDir === CACHEABLE_STORE_DIR_NAME) {
+            if ($altDir === CACHEABLE_STORE_DIR_NAME) {
                 $cacheDir = '_' . CACHEABLE_STORE_DIR_NAME;
             } else {
                 $cacheDir = '_' . $altDir . DIRECTORY_SEPARATOR . CACHEABLE_STORE_DIR_NAME;
@@ -552,13 +576,14 @@ class CacheableConfig {
      * @param boolean $withAssets
      * @return boolean|string
      */
-    public static function cache_dir_location($withAssets = true) {
+    public static function cache_dir_location($withAssets = true)
+    {
         $cacheDirPath = self::cache_dir_path();
         $isCacheDirRelative = stristr($cacheDirPath, ASSETS_DIR) !== false;
-        if($isCacheDirRelative) {
+        if ($isCacheDirRelative) {
             $uriTruncated = substr($cacheDirPath, 0, strpos($cacheDirPath, ASSETS_DIR));
             $result = str_replace($uriTruncated, '', $cacheDirPath);
-            if($withAssets) {
+            if ($withAssets) {
                 return '/' . $result;
             }
             return str_replace(ASSETS_DIR, '', $result);
@@ -580,7 +605,8 @@ class CacheableConfig {
      * @param string $cacheDir
      * @return string
      */
-    public static function cache_dir_name($cacheDir) {
+    public static function cache_dir_name($cacheDir)
+    {
         return pathinfo($cacheDir, PATHINFO_FILENAME);
     }
     
@@ -592,10 +618,11 @@ class CacheableConfig {
      * 
      * @return void
      */
-    private static function protect_cache_dir() {
+    private static function protect_cache_dir()
+    {
         $altCacheDir = Config::inst()->get('CacheableConfig', 'alt_cache_dir');
         $isHttpdConf = file_exists(self::cache_dir_path() . DIRECTORY_SEPARATOR . '.htaccess');
-        if($altCacheDir && !$isHttpdConf) {
+        if ($altCacheDir && !$isHttpdConf) {
             // Source SS template files for copying into final config 
             $resourceDir = CACHEABLE_MODULE_DIR . DIRECTORY_SEPARATOR . 'templates/resources';
             $httpdConf =  file_get_contents($resourceDir . DIRECTORY_SEPARATOR . 'htaccess.ss');
@@ -620,16 +647,16 @@ class CacheableConfig {
      * @see Unit tests for {@link self::cache_dir_path()} for more context.
      * @return void
      */
-    public static function prevent_cache_dir_sync() {
+    public static function prevent_cache_dir_sync()
+    {
         $altCacheDir = Config::inst()->get('CacheableConfig', 'alt_cache_dir');
-        if($altCacheDir) {
+        if ($altCacheDir) {
             $cachePathLocation = self::cache_dir_location(false);
             $cachePathParts = explode('/', ltrim($cachePathLocation, '/'));
             $pattern = "/^" . $cachePathParts[0] . "$/i";
             Config::inst()->update('Filesystem', 'sync_blacklisted_patterns', array($pattern));
         }
     }
-   
 }
 
 /**
@@ -640,6 +667,6 @@ class CacheableConfig {
  * @author Deviate Ltd 2015 http://www.deviate.net.nz
  * @package silverstripe-cachable
  */
-class CacheableException extends Exception {
-    
+class CacheableException extends Exception
+{
 }

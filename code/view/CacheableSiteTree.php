@@ -11,7 +11,8 @@
  * @author Deviate Ltd 2014-2015 http://www.deviate.net.nz
  * @package silverstripe-cachable
  */
-class CacheableSiteTree extends CacheableData {
+class CacheableSiteTree extends CacheableData
+{
 
     /**
      *
@@ -59,18 +60,19 @@ class CacheableSiteTree extends CacheableData {
      * 
      * @return SiteConfig
      */
-    public function getSiteConfig() {
-        if($this->hasMethod('alternateSiteConfig')) {
+    public function getSiteConfig()
+    {
+        if ($this->hasMethod('alternateSiteConfig')) {
             $altConfig = $this->alternateSiteConfig();
-            if($altConfig) {
+            if ($altConfig) {
                 return $altConfig;
             }
         }
 
-        if($nav = Config::inst()->get('Cacheable', '_cached_navigation')) {
+        if ($nav = Config::inst()->get('Cacheable', '_cached_navigation')) {
             $site_map = $nav->get_site_map();
             $site_config = $nav->get_site_config();
-            if(isset($site_map[$this->ID]) && $site_config->exists()) {
+            if (isset($site_map[$this->ID]) && $site_config->exists()) {
                 return $site_config;
             }
         }
@@ -83,8 +85,9 @@ class CacheableSiteTree extends CacheableData {
      * @param mixed string|int $key
      * @return mixed
      */
-    public function getCachedSourceQueryParam($key) {
-        if(isset($this->getSourceQueryParams[$key])) {
+    public function getCachedSourceQueryParam($key)
+    {
+        if (isset($this->getSourceQueryParams[$key])) {
             return $this->getSourceQueryParams[$key];
         }
         
@@ -96,59 +99,68 @@ class CacheableSiteTree extends CacheableData {
      * @param Member $member
      * @return boolean
      */
-    public function canView($member = null) {
-        if(!$member || !(is_a($member, 'Member')) || is_numeric($member)) {
+    public function canView($member = null)
+    {
+        if (!$member || !(is_a($member, 'Member')) || is_numeric($member)) {
             $member = Member::currentUserID();
         }
 
         // admin override
-        if($member && Permission::checkMember($member, array("ADMIN", "SITETREE_VIEW_ALL")))
+        if ($member && Permission::checkMember($member, array("ADMIN", "SITETREE_VIEW_ALL"))) {
             return true;
+        }
         // make sure we were loaded off an allowed stage
         // Were we definitely loaded directly off Live during our query?
         $fromLive = true;
-        foreach(array('mode' => 'stage', 'stage' => 'live') as $param => $match) {
+        foreach (array('mode' => 'stage', 'stage' => 'live') as $param => $match) {
             $fromLive = $fromLive && strtolower((string) $this->getCachedSourceQueryParam("Versioned.$param")) == $match;
         }
-        if(!$fromLive && !Session::get('unsecuredDraftSite') && !Permission::checkMember($member, array('CMS_ACCESS_LeftAndMain', 'CMS_ACCESS_CMSMain', 'VIEW_DRAFT_CONTENT'))) {
+        if (!$fromLive && !Session::get('unsecuredDraftSite') && !Permission::checkMember($member, array('CMS_ACCESS_LeftAndMain', 'CMS_ACCESS_CMSMain', 'VIEW_DRAFT_CONTENT'))) {
             // If we weren't definitely loaded from live, and we can't view non-live content, we need to
             // check to make sure this version is the live version and so can be viewed
-            if(Versioned::get_versionnumber_by_stage($this->ClassName, 'Live', $this->ID) != $this->Version)
+            if (Versioned::get_versionnumber_by_stage($this->ClassName, 'Live', $this->ID) != $this->Version) {
                 return false;
+            }
         }
 
         // Orphaned pages (in the current stage) are unavailable, except for admins via the CMS
-        if($this->isOrphaned())
+        if ($this->isOrphaned()) {
             return false;
+        }
 
         // Standard mechanism for accepting permission changes from extensions
         $extended = $this->extendedCan('canView', $member);
-        if($extended !== null)
+        if ($extended !== null) {
             return $extended;
+        }
         // check for empty spec
-        if(!$this->CanViewType || $this->CanViewType == 'Anyone')
+        if (!$this->CanViewType || $this->CanViewType == 'Anyone') {
             return true;
+        }
 
         // check for inherit
-        if($this->CanViewType == 'Inherit') {
-            if($parent = $this->getParent())
+        if ($this->CanViewType == 'Inherit') {
+            if ($parent = $this->getParent()) {
                 return $parent->canView($member);
-            else
+            } else {
                 return $this->getSiteConfig()->canView($member);
+            }
         }
 
         // check for any logged-in users
-        if($this->CanViewType == 'LoggedInUsers' && $member) {
+        if ($this->CanViewType == 'LoggedInUsers' && $member) {
             return true;
         }
 
         // check for specific groups
-        if($member && is_numeric($member))
+        if ($member && is_numeric($member)) {
             $member = DataObject::get_by_id('Member', $member);
-        if(
+        }
+        if (
                 $this->CanViewType == 'OnlyTheseUsers' && $member && $member->inGroups($this->ViewerGroups)
-        )
+        ) {
             return true;
+        }
 
         return false;
     }
@@ -158,7 +170,8 @@ class CacheableSiteTree extends CacheableData {
      * @param CacheableData $data
      * @return void
      */
-    public function addChild(CacheableData $data) {
+    public function addChild(CacheableData $data)
+    {
         $this->Children[$data->ID] = $data;
     }
 
@@ -172,9 +185,10 @@ class CacheableSiteTree extends CacheableData {
      * @param boolean $force    Invoke PHP's unset() function on the selected item.
      * @return void
      */
-    public function removeChild($childID, $force = true) {
-        if(isset($this->Children[$childID])) {
-            if($force === true) {
+    public function removeChild($childID, $force = true)
+    {
+        if (isset($this->Children[$childID])) {
+            if ($force === true) {
                 unset($this->Children[$childID]);
             } else {
                 $this->Children[$childID] = CacheableSiteTree::create(); // dummy
@@ -186,7 +200,8 @@ class CacheableSiteTree extends CacheableData {
      * 
      * @param CacheableData $data
      */
-    public function setParent(CacheableData $data) {
+    public function setParent(CacheableData $data)
+    {
         $this->Parent = $data;
     }
 
@@ -194,7 +209,8 @@ class CacheableSiteTree extends CacheableData {
      * 
      * @return CacheableData
      */
-    public function getParent() {
+    public function getParent()
+    {
         return $this->Parent;
     }
 
@@ -202,7 +218,8 @@ class CacheableSiteTree extends CacheableData {
      * 
      * @return array
      */
-    public function getAllChildren() {
+    public function getAllChildren()
+    {
         return $this->Children;
     }
 
@@ -216,20 +233,21 @@ class CacheableSiteTree extends CacheableData {
      * @param array $filter
      * @return ArrayList
      */
-    public function getChildren($showInMenusFilter = true, $filter = array()) {
+    public function getChildren($showInMenusFilter = true, $filter = array())
+    {
         $children = new ArrayList($this->Children);
         // If $showInMenusFilter is true, _always_ apply 'ShowInMenus' => 1
-        if($showInMenusFilter === true) {
+        if ($showInMenusFilter === true) {
             $filter = array('ShowInMenus' => 1);
         }
 
-        if($filter) {
+        if ($filter) {
             $children = $children->filter($filter);
         }
 
         $visible = array();
-        foreach($children as $child) {
-            if($child->canView()) {
+        foreach ($children as $child) {
+            if ($child->canView()) {
                 $visible[] = $child;
             }
         }
@@ -241,7 +259,8 @@ class CacheableSiteTree extends CacheableData {
      *
      * @return string
      */
-    public function LinkOrCurrent() {
+    public function LinkOrCurrent()
+    {
         return $this->isCurrent() ? 'current' : 'link';
     }
 
@@ -250,7 +269,8 @@ class CacheableSiteTree extends CacheableData {
      *
      * @return string
      */
-    public function LinkOrSection() {
+    public function LinkOrSection()
+    {
         return $this->isSection() ? 'section' : 'link';
     }
 
@@ -258,10 +278,11 @@ class CacheableSiteTree extends CacheableData {
      * 
      * @return string
      */
-    public function LinkingMode() {
-        if($this->isCurrent()) {
+    public function LinkingMode()
+    {
+        if ($this->isCurrent()) {
             return 'current';
-        } elseif($this->isSection()) {
+        } elseif ($this->isSection()) {
             return 'section';
         } else {
             return 'link';
@@ -272,13 +293,14 @@ class CacheableSiteTree extends CacheableData {
      * 
      * @return boolean
      */
-    public function isSection() {
+    public function isSection()
+    {
         $isSection = false;
-        if($this->_cached_is_section === null) {
-            if($this->isCurrent()) {
+        if ($this->_cached_is_section === null) {
+            if ($this->isCurrent()) {
                 $isSection = true;
             } else {
-                if($navigation = $this->CachedNavigation()) {
+                if ($navigation = $this->CachedNavigation()) {
                     $currentPage = Director::get_current_page();
                     $ancestors = $navigation->getAncestores($currentPage->ID);
                     $isSection = $currentPage instanceof SiteTree && in_array($this->ID, $ancestors->column());
@@ -295,7 +317,8 @@ class CacheableSiteTree extends CacheableData {
      * 
      * @return boolean
      */
-    public function isCurrent() {
+    public function isCurrent()
+    {
         return $this->ID ? $this->ID == Director::get_current_page()->ID : $this === Director::get_current_page();
     }
 
@@ -303,9 +326,10 @@ class CacheableSiteTree extends CacheableData {
      * 
      * @return boolean
      */
-    public function isOrphaned() {
+    public function isOrphaned()
+    {
         // Always false for root pages
-        if(empty($this->ParentID)) {
+        if (empty($this->ParentID)) {
             return false;
         }
         
@@ -318,11 +342,12 @@ class CacheableSiteTree extends CacheableData {
      * 
      * @return string
      */
-    public function debug_simple() {
+    public function debug_simple()
+    {
         $message = "<h5>cacheable data: " . get_class($this) . "</h5><ul>";
         $message .= "<il>ID: " . $this->ID . ". Title: " . $this->Title . ". ClassName" . $this->ClassName . "</il>";
         $parent = $this->getParent();
-        if($parent && $parent->exists()) {
+        if ($parent && $parent->exists()) {
             $message .= "<il>Parent ID: " . $parent->ID . ". Title: " . $parent->Title . ". ClassName" . $parent->ClassName . "</il>";
         }
         $message .= "</ul>";
@@ -334,9 +359,10 @@ class CacheableSiteTree extends CacheableData {
      * @param int $level
      * @return ArrayList
      */
-    public function Menu($level = 1) {
-        if($nav = $this->CachedNavigation()) {
-            if($level == 1) {
+    public function Menu($level = 1)
+    {
+        if ($nav = $this->CachedNavigation()) {
+            if ($level == 1) {
                 $root_elements = new ArrayList($nav->get_root_elements());
                 $result = $root_elements->filter(array(
                     "ShowInMenus" => 1
@@ -344,17 +370,17 @@ class CacheableSiteTree extends CacheableData {
             } else {
                 $dataID = Director::get_current_page()->ID;
                 $site_map = $nav->get_site_map();
-                if(isset($site_map[$dataID])) {
+                if (isset($site_map[$dataID])) {
                     $parent = $site_map[$dataID];
 
                     $stack = array($parent);
-                    if($parent) {
-                        while($parent = $parent->getParent()) {
+                    if ($parent) {
+                        while ($parent = $parent->getParent()) {
                             array_unshift($stack, $parent);
                         }
                     }
 
-                    if(isset($stack[$level - 2])) {
+                    if (isset($stack[$level - 2])) {
                         $elements = new ArrayList($stack[$level - 2]->getAllChildren());
                         $result = $elements->filter(
                                 array(
@@ -369,9 +395,9 @@ class CacheableSiteTree extends CacheableData {
 
             // Remove all entries the can not be viewed by the current user
             // We might need to create a show in menu permission
-            if(isset($result)) {
-                foreach($result as $page) {
-                    if($page->canView()) {
+            if (isset($result)) {
+                foreach ($result as $page) {
+                    if ($page->canView()) {
                         $visible[] = $page;
                     }
                 }
@@ -385,9 +411,10 @@ class CacheableSiteTree extends CacheableData {
      * 
      * @return CachedNavigation
      */
-    public function CachedNavigation() {
-        if($cachedNavigiation = Config::inst()->get('Cacheable', '_cached_navigation')) {
-            if($cachedNavigiation->isUnlocked() && $cachedNavigiation->get_completed()) {
+    public function CachedNavigation()
+    {
+        if ($cachedNavigiation = Config::inst()->get('Cacheable', '_cached_navigation')) {
+            if ($cachedNavigiation->isUnlocked() && $cachedNavigiation->get_completed()) {
                 return $cachedNavigiation;
             }
         }
@@ -408,16 +435,16 @@ class CacheableSiteTree extends CacheableData {
      * 
      * @return string
      */
-    public function MenuTitle() {
-        if($this->hasFluent()) {
+    public function MenuTitle()
+    {
+        if ($this->hasFluent()) {
             $localeCurrent = Fluent::current_locale();
             $fieldCurrent = 'MenuTitle_' . $localeCurrent;
-            if(isset($this->$fieldCurrent) && $title = $this->$fieldCurrent) {
+            if (isset($this->$fieldCurrent) && $title = $this->$fieldCurrent) {
                 return $title;
             }
         }
 
         return $this->MenuTitle;
     }
-
 }

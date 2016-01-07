@@ -12,7 +12,8 @@
  */
 spl_autoload_register('CacheableNavigationService::callback_spl');
 
-class CacheableNavigationService {
+class CacheableNavigationService
+{
     
     /**
      *
@@ -54,14 +55,15 @@ class CacheableNavigationService {
      * @param SiteConfig $config
      * @param DataObject $model
      */
-	public function __construct($mode = null, $config = null, $model = null) {
-        if($mode) {
+    public function __construct($mode = null, $config = null, $model = null)
+    {
+        if ($mode) {
             $this->mode = $mode;
         }
-        if($config) {
+        if ($config) {
             $this->config = $config;
         }
-        if($model) {
+        if ($model) {
             $this->model = $model;
         }
     }
@@ -76,37 +78,44 @@ class CacheableNavigationService {
      * @see // See: http://zend-framework-community.634137.n4.nabble.com/Zend-Cache-dosent-seem-to-be-returning-the-object-I-saved-td646246.html
      * @return void
      */
-    public static function callback_spl() {
+    public static function callback_spl()
+    {
         require_once dirname(__FILE__) . '/../../../' . THIRDPARTY_DIR . '/Zend/Cache/Frontend/Class.php';
-        if(CacheableConfig::current_cache_mode() === 'memcached') {
+        if (CacheableConfig::current_cache_mode() === 'memcached') {
             require_once dirname(__FILE__) . '/../../../' . THIRDPARTY_DIR . '/Zend/Cache/Backend/Libmemcached.php';
         }
-        if(CacheableConfig::current_cache_mode() === 'apc') {
+        if (CacheableConfig::current_cache_mode() === 'apc') {
             require_once dirname(__FILE__) . '/../../../' . THIRDPARTY_DIR . '/Zend/Cache/Backend/Apc.php';
         }
     }
 
-	public function set_mode($mode) {
+    public function set_mode($mode)
+    {
         $this->mode = $mode;
     }
 
-	public function get_mode() {
+    public function get_mode()
+    {
         return $this->mode;
     }
 
-	public function set_config(SiteConfig $config) {
+    public function set_config(SiteConfig $config)
+    {
         $this->config = $config;
     }
 
-	public function get_config() {
+    public function get_config()
+    {
         return $this->config;
     }
 
-	public function set_model(DataObject $model) {
+    public function set_model(DataObject $model)
+    {
         $this->model = $model;
     }
 
-	public function get_model() {
+    public function get_model()
+    {
         return $this->model;
     }
 
@@ -115,7 +124,8 @@ class CacheableNavigationService {
      * 
      * @return string
      */
-    public function getIdentifier() {
+    public function getIdentifier()
+    {
         $configID = $this->get_config() ? $this->get_config()->ID : 1;
         return ucfirst($this->get_mode()) . "Site" . $configID;
     }
@@ -128,8 +138,9 @@ class CacheableNavigationService {
      * 
      * @return CachedNavigation
      */
-    public function getCacheableFrontEnd() {
-        if(!$this->_cacheable_frontend) {
+    public function getCacheableFrontEnd()
+    {
+        if (!$this->_cacheable_frontend) {
             $for = CACHEABLE_STORE_FOR;
             $id = $this->getIdentifier();
             $cache = SS_Cache::factory($for, 'Class', array(
@@ -138,7 +149,7 @@ class CacheableNavigationService {
                 'automatic_serialization'=>true
             ));
             
-            if(!$cached = $cache->load($id)) {
+            if (!$cached = $cache->load($id)) {
                 $entity = new CachedNavigation();
                 $this->_cacheable_frontend = SS_Cache::factory($for, 'Class', array(
                     'lifetime'=>null,
@@ -155,7 +166,7 @@ class CacheableNavigationService {
                 ));
                 $this->cached = $cached;
             }
-       }
+        }
         
         return $this->_cacheable_frontend;
     }
@@ -167,15 +178,16 @@ class CacheableNavigationService {
      * @return boolean  false if the underlying calls to {@link Zend_Cache_Core::load()}
      *                  or {@link Zend_Cache_Core::save()} fail for any reason.
      */
-    public function refreshCachedConfig() {
+    public function refreshCachedConfig()
+    {
         $this->applySubsiteTheme();
         $config = $this->get_config();
         $cacheable = CacheableDataModelConvert::model2cacheable($config);
         // manipulating the CachedNavigation for its cached SiteConfig
         $frontend = $this->getCacheableFrontEnd();
         $id = $this->getIdentifier();
-        if(!$this->_cached) {
-            if(!$cached = $frontend->load($id)) {
+        if (!$this->_cached) {
+            if (!$cached = $frontend->load($id)) {
                 return false;
             }
             $this->_cached = $cached;
@@ -185,8 +197,8 @@ class CacheableNavigationService {
         $frontend->remove($id);
         
         return $frontend->save(
-                    $this->_cached, 
-                    $id, 
+                    $this->_cached,
+                    $id,
                     array(self::get_default_cache_tag())
                 );
     }
@@ -197,12 +209,13 @@ class CacheableNavigationService {
      *
      * @return null
      */
-    private function applySubsiteTheme() {
-        if(class_exists('Subsite')) {
+    private function applySubsiteTheme()
+    {
+        if (class_exists('Subsite')) {
             $config = $this->get_config();
-            if($config->SubsiteID) {
+            if ($config->SubsiteID) {
                 $subsite = DataObject::get_by_id("Subsite", $config->SubsiteID);
-                if($subsite && $subsite->exists() && $subsite->Theme) {
+                if ($subsite && $subsite->exists() && $subsite->Theme) {
                     Config::inst()->update("SSViewer", "theme", $subsite->Theme);
                 }
             }
@@ -217,11 +230,12 @@ class CacheableNavigationService {
      * @return boolean  false if the underlying calls to {@link Zend_Cache_Core::load()}
      *                  or {@link Zend_Cache_Core::save()} fail for any reason.
      */
-    public function removeCachedPage($forceRemoval = true) {
+    public function removeCachedPage($forceRemoval = true)
+    {
         $frontend = $this->getCacheableFrontEnd();
         $id = $this->getIdentifier();
-        if(!$this->_cached) {
-            if(!$cached = $frontend->load($id)) {
+        if (!$this->_cached) {
+            if (!$cached = $frontend->load($id)) {
                 return false;
             }
             $this->_cached = $cached;
@@ -230,26 +244,26 @@ class CacheableNavigationService {
         $site_map = $this->_cached->get_site_map();
         $root_elements = $this->_cached->get_root_elements();
         $model = $this->get_model();
-        if(isset($root_elements[$model->ID])) {
+        if (isset($root_elements[$model->ID])) {
             // Remove the object from the sitemap
             unset($root_elements[$model->ID]);
             $this->_cached->set_root_elements($root_elements);
         }
         
-        if(isset($site_map[$model->ID])) {
+        if (isset($site_map[$model->ID])) {
             $parentCached = $site_map[$model->ID]->getParent();
-            if($parentCached && $parentCached->ID && isset($site_map[$parentCached->ID])) {
+            if ($parentCached && $parentCached->ID && isset($site_map[$parentCached->ID])) {
                 $site_map[$parentCached->ID]->removeChild($model->ID, $forceRemoval);
             }
         }
         
-        if($model->ParentID) {
-            if(isset($site_map[$model->ParentID])) {
+        if ($model->ParentID) {
+            if (isset($site_map[$model->ParentID])) {
                 $site_map[$model->ParentID]->removeChild($model->ID, $forceRemoval);
             }
         }
         
-        if(isset($site_map[$model->ID])) {
+        if (isset($site_map[$model->ID])) {
             unset($site_map[$model->ID]);
         }
         
@@ -257,8 +271,8 @@ class CacheableNavigationService {
         $frontend->remove($id);
         
         return $frontend->save(
-                    $this->_cached, 
-                    $id, 
+                    $this->_cached,
+                    $id,
                     array(self::get_default_cache_tag())
                 );
     }
@@ -275,12 +289,13 @@ class CacheableNavigationService {
      * @return boolean              False if the underlying calls to {@link Zend_Cache_Core::load()}
      *                              or {@link Zend_Cache_Core::save()} fail for any reason.
      */
-    public function refreshCachedPage($forceRemoval = false) {
+    public function refreshCachedPage($forceRemoval = false)
+    {
         $model = $this->get_model();
         $cacheableClass = 'CacheableSiteTree';
         $classes = array_reverse(ClassInfo::ancestry(get_class($model)));
-        foreach($classes as $class) {
-            if(class_exists($cachedDataClass = 'Cacheable' . $class)) {
+        foreach ($classes as $class) {
+            if (class_exists($cachedDataClass = 'Cacheable' . $class)) {
                 $cacheableClass = $cachedDataClass;
                 break;
             }
@@ -290,23 +305,23 @@ class CacheableNavigationService {
         $frontend = $this->getCacheableFrontEnd();
         $id = $this->getIdentifier();
         
-        if(!$this->_cached) {
-            if(!$cached = $frontend->load($id)) {
+        if (!$this->_cached) {
+            if (!$cached = $frontend->load($id)) {
                 return false;
             }
             $this->_cached = $cached;
         }
 
         $site_map = $this->_cached->get_site_map();
-        if(isset($site_map[$cacheable->ID])) {
+        if (isset($site_map[$cacheable->ID])) {
             $parentCached = $site_map[$cacheable->ID]->getParent();
-            if($parentCached && $parentCached->ID && isset($site_map[$parentCached->ID])) {
+            if ($parentCached && $parentCached->ID && isset($site_map[$parentCached->ID])) {
                 $site_map[$parentCached->ID]->removeChild($cacheable->ID, $forceRemoval);
             }
             
             $children = $site_map[$cacheable->ID]->getAllChildren();
-            if(count($children)) {
-                foreach($children as $child) {
+            if (count($children)) {
+                foreach ($children as $child) {
                     $cacheable->addChild($child);
                     $child->setParent($cacheable);
                 }
@@ -316,20 +331,19 @@ class CacheableNavigationService {
         }
         
         $root_elements = $this->_cached->get_root_elements();
-        if($cacheable->ParentID) {
-            if(!isset($site_map[$cacheable->ParentID])) {
+        if ($cacheable->ParentID) {
+            if (!isset($site_map[$cacheable->ParentID])) {
                 $parent = new CacheableSiteTree();
                 $parent->ID = $cacheable->ParentID;
                 $parent->addChild($cacheable);
                 $cacheable->setParent($parent);
                 $site_map[$cacheable->ParentID] = $parent;
-
             } else {
                 $site_map[$cacheable->ParentID] -> addChild($cacheable);
                 $cacheable->setParent($site_map[$cacheable->ParentID]);
             }
             
-            if(isset($root_elements[$cacheable->ID])) {
+            if (isset($root_elements[$cacheable->ID])) {
                 unset($root_elements[$cacheable->ID]);
             }
         } else {
@@ -342,8 +356,8 @@ class CacheableNavigationService {
         $frontend->remove($id);
         
         return $frontend->save(
-                    $this->_cached, 
-                    $id, 
+                    $this->_cached,
+                    $id,
                     array(self::get_default_cache_tag())
                 );
     }
@@ -355,11 +369,12 @@ class CacheableNavigationService {
      * 
      * @return boolean
      */
-    public function completeBuild() {
+    public function completeBuild()
+    {
         $frontend = $this->getCacheableFrontEnd();
         $id = $this->getIdentifier();
-        if(!$this->_cached) {
-            if(!$cached = $frontend->load($id)) {
+        if (!$this->_cached) {
+            if (!$cached = $frontend->load($id)) {
                 return false;
             }
             $this->_cached = $cached;
@@ -368,8 +383,8 @@ class CacheableNavigationService {
         $this->_cached->set_completed(true);
         
         return $frontend->save(
-                    $this->_cached, 
-                    $id, 
+                    $this->_cached,
+                    $id,
                     array(self::get_default_cache_tag())
                 );
     }
@@ -380,7 +395,8 @@ class CacheableNavigationService {
      * 
      * @return string
      */
-    private static function get_default_cache_tag() {
+    private static function get_default_cache_tag()
+    {
         return CacheableConfig::is_running_test() ? CACHEABLE_STORE_TAG_DEFAULT_TEST : CACHEABLE_STORE_TAG_DEFAULT;
     }
     
@@ -390,11 +406,13 @@ class CacheableNavigationService {
      * 
      * @return void
      */
-    public function clearInternalCache() {
+    public function clearInternalCache()
+    {
         $this->_cached = null;
     }
 
-    public function clearCacheableFrontend() {
+    public function clearCacheableFrontend()
+    {
         $this->_cacheable_frontend = null;
     }
     
@@ -419,10 +437,11 @@ class CacheableNavigationService {
      * @param string $identifier
      * @return boolean|CachedNavigation
      */
-    public function getObjectCache($frontend = null, $identifier = null) {
+    public function getObjectCache($frontend = null, $identifier = null)
+    {
         $frontend = $frontend ? $frontend : $this->getCacheableFrontEnd();
         $id = $identifier ? $identifier : $this->getIdentifier();
-        if(!$cached = $frontend->load($id)) {
+        if (!$cached = $frontend->load($id)) {
             return false;
         }
         

@@ -12,7 +12,8 @@
  * @package silverstripe-cachable
  * @todo Add status for non-file backends
  */
-class CacheableCacheInspectorController extends Controller {
+class CacheableCacheInspectorController extends Controller
+{
     
     /**
      * 
@@ -44,10 +45,11 @@ class CacheableCacheInspectorController extends Controller {
      * 
      * @return void
      */
-    public function init() {
+    public function init()
+    {
         parent::init();
         
-        if(!Permission::check('ADMIN')) {
+        if (!Permission::check('ADMIN')) {
             return $this->redirect('/', 403);
         }
     }
@@ -58,7 +60,8 @@ class CacheableCacheInspectorController extends Controller {
      * @param string $action
      * @return HTMLText
      */
-    public function handleAction($request, $action) {
+    public function handleAction($request, $action)
+    {
         parent::handleAction($request, $action);
         
         return $this->inspect();
@@ -70,11 +73,12 @@ class CacheableCacheInspectorController extends Controller {
      * 
      * @return HTMLText
      */
-    public function inspect() {
+    public function inspect()
+    {
         $backend = ucfirst(CacheableConfig::current_cache_mode());
         $backendData['PHPMemoryLimit'] = ini_get('memory_limit');
         
-        switch($backend) {            
+        switch ($backend) {
             // File backend
             case 'File':
                 $fileList = ArrayList::create(Cacheable::get_cache_files());
@@ -104,7 +108,7 @@ class CacheableCacheInspectorController extends Controller {
         $templateAbsolute = __DIR__ . '/../../templates/includes/' . $templateLocal . '.ss';
         
         $bData = '';
-        if(file_exists($templateAbsolute)) {
+        if (file_exists($templateAbsolute)) {
             $bData = $this->renderWith($templateLocal, $backendData);
         }
         
@@ -129,14 +133,15 @@ class CacheableCacheInspectorController extends Controller {
      * @param string $className
      * @return int $total
      */
-    private function getTotalCachedObjects($stage, $className = 'CacheableSiteTree') {
+    private function getTotalCachedObjects($stage, $className = 'CacheableSiteTree')
+    {
         $conf = SiteConfig::current_site_config();
         $service = new CacheableNavigationService($stage, $conf);
         $cache = $service->getObjectCache();
         $cachedIDs = $this->_cachedIDs;
-        if($cache && $siteMap = $cache->get_site_map()) {
+        if ($cache && $siteMap = $cache->get_site_map()) {
             // For reasons unknown, items appear in object-cache with NULL properties
-            $cachedSiteTree = ArrayList::create($siteMap)->filterByCallback(function($item) use (&$cachedIDs) {
+            $cachedSiteTree = ArrayList::create($siteMap)->filterByCallback(function ($item) use (&$cachedIDs) {
                 try {
                     if (!is_null($item->ParentID)) {
                         // push the item ID to the _cachedIDs array for comparison later
@@ -144,8 +149,8 @@ class CacheableCacheInspectorController extends Controller {
                         return true;
                     }
                     return false;
-                } catch(Exception $e) {
-                    echo ($e->getMessage());
+                } catch (Exception $e) {
+                    echo($e->getMessage());
                 }
             });
             $this->_cachedIDs = $cachedIDs;
@@ -164,11 +169,12 @@ class CacheableCacheInspectorController extends Controller {
      * @param string $className
      * @return int
      */
-    private function getTotalDBObjects($stage, $className = 'SiteTree') {
+    private function getTotalDBObjects($stage, $className = 'SiteTree')
+    {
         $mode = 'Stage.' . $stage;
         Versioned::set_reading_mode($mode);
-        if(!$this->_dbObjects || !isset($this->_dbObjects[$stage])) {
-            if($list = DataObject::get($className)) {
+        if (!$this->_dbObjects || !isset($this->_dbObjects[$stage])) {
+            if ($list = DataObject::get($className)) {
                 $this->_dbObjects[$stage] = $list;
                 //store all object IDs into an array for comparison later
                 $this->_dbObjectIDs[$stage] = $list->map("ID", "ID")->toArray();
@@ -186,12 +192,13 @@ class CacheableCacheInspectorController extends Controller {
      * @param string $className
      * @return ArrayData
      */
-    private function cacheToORMCompareDataObject($stage, $className) {
+    private function cacheToORMCompareDataObject($stage, $className)
+    {
         $cacheTotal = $this->getTotalCachedObjects($stage, $className);
         $ormTotal = $this->getTotalDBObjects($stage, $className);
         $isOk = $this->printStatus('OK');
         $isFail = $this->printStatus('FAIL');
-        if($cacheTotal && $ormTotal && ($cacheTotal + $ormTotal) >0) {
+        if ($cacheTotal && $ormTotal && ($cacheTotal + $ormTotal) >0) {
             $status = ($ormTotal - $cacheTotal) === 0 ? $isOk : $isFail;
             $comparison = $status . ' ' . $cacheTotal . ' / ' . $ormTotal;
         } else {
@@ -201,10 +208,10 @@ class CacheableCacheInspectorController extends Controller {
         $comparison .= ' ' . $className . ' (' . $stage . ')';
 
         $missed = '';
-        if(isset($this->_dbObjectIDs[$stage])) {
+        if (isset($this->_dbObjectIDs[$stage])) {
             //array_diff will get all IDs that missed from cache on $stage
             $cacheMissings = array_diff($this->_dbObjectIDs[$stage], $this->_cachedIDs);
-            if(!empty($cacheMissings)) {
+            if (!empty($cacheMissings)) {
                 $missed = "[".implode(", ", $cacheMissings)."]";
             }
         }
@@ -221,9 +228,10 @@ class CacheableCacheInspectorController extends Controller {
      * @param string $backend
      * @return string
      */
-    private function getCacheLastUpdated($backend = 'file') {
-        if($backend === 'file') {
-            if($files = Cacheable::get_cache_files()) {
+    private function getCacheLastUpdated($backend = 'file')
+    {
+        if ($backend === 'file') {
+            if ($files = Cacheable::get_cache_files()) {
                 $list = ArrayList::create($files)->sort('Date', 'DESC');
                 return $list->first()->Date;
             }
@@ -239,11 +247,12 @@ class CacheableCacheInspectorController extends Controller {
      * @param string $backend
      * @return int
      */
-    private function getCacheSize($backend = 'file') {
+    private function getCacheSize($backend = 'file')
+    {
         $size = 0;
-        if($backend === 'file') {
-            if($files = Cacheable::get_cache_files()) {
-                foreach($files as $file) {
+        if ($backend === 'file') {
+            if ($files = Cacheable::get_cache_files()) {
+                foreach ($files as $file) {
                     $size += $file->Size;
                 }
             }
@@ -262,7 +271,8 @@ class CacheableCacheInspectorController extends Controller {
      * @param string $status
      * @return string
      */
-    private function printStatus($status) {
+    private function printStatus($status)
+    {
         $txtCss = strtolower($status);
         $txtMsg = strtoupper($status);
         return '<span class="is-' . $txtCss . '">[' . $txtMsg . ']</span>';
