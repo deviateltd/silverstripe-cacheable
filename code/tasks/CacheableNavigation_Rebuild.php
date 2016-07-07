@@ -254,13 +254,13 @@ class CacheableNavigation_Rebuild extends BuildTask
      * to refresh the caches of. Once run, $chunk is truncated and passed back its
      * original reference.
      * 
-     * @param CachableNavigationService $service
+     * @param CacheableNavigationService $service
      * @param array $chunk
      * @param string $stage
      * @param number $subsiteID
      * @return number $jobDescriptorID (Return value not used)
      */
-    public function queue(CachableNavigationService $service, $chunk, $stage, $subsiteID)
+    public function queue(CacheableNavigationService $service, $chunk, $stage, $subsiteID)
     {
         // We only need to do this during queueing
         $service->clearInternalCache();
