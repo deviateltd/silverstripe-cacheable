@@ -150,7 +150,10 @@ abstract class CacheableData extends ViewableData
         $message .= "\t\t\t<li>ID: " . $object->ID . "</li>";
         $message .= "\t\t\t<li>Title: " . $object->Title . "</li>";
         $message .= "\t\t\t<li>ClassName: " . $object->ClassName . "</li>";
-        $message .= "\t\t\t<li>Child count: " . $object->getChildren()->count() . "</li>";
+        //ToDo: In case of the cached object is a CachableSiteConfig object,it doesn't now has an getChildren,
+        // we disable calling getChildrent() here so the debug function is not broken, but we need to find a better way
+        // to do the debug
+        //$message .= "\t\t\t<li>Child count: " . $object->getChildren()->count() . "</li>";
         $message .= "\t\t</ul>";
         $message .= "\t</li>";
         $message .= "</ul>";
@@ -179,9 +182,12 @@ abstract class CacheableData extends ViewableData
         $message .= "<h2>Child nodes of this object:</h2>";
 
         $message .= '<ol>';
-        foreach ($object->getChildren() as $child) {
+        //ToDo: In case of the cached object is a CachableSiteConfig object,it doesn't now has an getChildren,
+        // we disable calling getChildrent() here so the debug function is not broken, but we need to find a better way
+        // to do the debug
+/*        foreach ($object->getChildren() as $child) {
             $message .= "\t<li>" . $child->Title . ' (#' . $child->ID . ')</li>';
-        }
+        }*/
         $message .= '</ol>';
 
         return $message;
