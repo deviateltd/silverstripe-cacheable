@@ -135,6 +135,8 @@ class CacheableCacheInspectorController extends Controller
      */
     private function getTotalCachedObjects($stage, $className = 'CacheableSiteTree')
     {
+        $currentStage = Versioned::current_stage();
+        Versioned::reading_stage($stage);
         $conf = SiteConfig::current_site_config();
         $service = new CacheableNavigationService($stage, $conf);
         $cache = $service->getObjectCache();
@@ -154,9 +156,12 @@ class CacheableCacheInspectorController extends Controller
                 }
             });
             $this->_cachedIDs = $cachedIDs;
+
+            Versioned::reading_stage($currentStage);
             return $cachedSiteTree->count();
         }
-        
+
+        Versioned::reading_stage($currentStage);
         return 0;
     }
     
@@ -171,8 +176,8 @@ class CacheableCacheInspectorController extends Controller
      */
     private function getTotalDBObjects($stage, $className = 'SiteTree')
     {
-        $mode = 'Stage.' . $stage;
-        Versioned::set_reading_mode($mode);
+        $currentStage = Versioned::current_stage();
+        Versioned::reading_stage($stage);
         if (!$this->_dbObjects || !isset($this->_dbObjects[$stage])) {
             if ($list = DataObject::get($className)) {
                 $this->_dbObjects[$stage] = $list;
@@ -180,7 +185,7 @@ class CacheableCacheInspectorController extends Controller
                 $this->_dbObjectIDs[$stage] = $list->map("ID", "ID")->toArray();
             }
         }
-        
+        Versioned::reading_stage($currentStage);
         return $this->_dbObjects && !empty($this->_dbObjects[$stage]) ? $this->_dbObjects[$stage]->count() : 0;
     }
     

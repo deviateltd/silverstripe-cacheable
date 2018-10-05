@@ -74,15 +74,15 @@ class CacheableNavigation_Rebuild extends BuildTask
         // All stages
         } else {
             $stage_mode_mapping = array(
-                "Stage" => "stage",
-                "Live"  => "live",
+                "Stage" => "Stage",
+                "Live"  => "Live",
             );
         }
 
         $canQueue = interface_exists('QueuedJob');
         $siteConfigs = DataObject::get('SiteConfig');
         foreach ($stage_mode_mapping as $stage => $mode) {
-            Versioned::set_reading_mode('Stage.' . $stage);
+            Versioned::reading_stage($stage);
             if (class_exists('Subsite')) {
                 Subsite::disable_subsite_filter(true);
                 Config::inst()->update("CacheableSiteConfig", 'cacheable_fields', array('SubsiteID'));
@@ -181,7 +181,7 @@ class CacheableNavigation_Rebuild extends BuildTask
             }
         }
 
-        Versioned::set_reading_mode($currentStage);
+        Versioned::reading_stage($currentStage);
         
         $endTime = time();
         $totalTime = ($endTime - $startTime);

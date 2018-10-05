@@ -39,8 +39,8 @@ class Cacheable extends SiteTreeExtension
         $service = new CacheableNavigationService();
         $currentStage = Versioned::current_stage();
         $stage_mode_mapping = array(
-            "Stage" => "stage",
-            "Live"  => "live",
+            "Stage" => "Stage",
+            "Live"  => "Live",
         );
         
         $service->set_mode($stage_mode_mapping[$currentStage]);
@@ -77,34 +77,34 @@ class Cacheable extends SiteTreeExtension
     public function onAfterWrite()
     {
         $this->refreshPageCache(array(
-            'Stage' => 'stage',
+            'Stage' => 'Stage',
         ), false);
     }
 
     public function onAfterPublish(&$original)
     {
         $this->refreshPageCache(array(
-            'Live' => 'live',
+            'Live' => 'Live',
         ), false);
     }
 
     public function onAfterUnpublish()
     {
         $this->removePageCache(array(
-            'Live' => 'live',
+            'Live' => 'Live',
         ), false);
     }
 
     public function onAfterDelete()
     {
         $this->removePageCache(array(
-            'Stage' => 'stage',
-            'Live' => 'live',
+            'Stage' => 'Stage',
+            'Live' => 'Live',
         ), false);
         
         $this->refreshPageCache(array(
-            'Stage' => 'stage',
-            'Live' => 'live',
+            'Stage' => 'Stage',
+            'Live' => 'Live',
         ), false);
     }
 
