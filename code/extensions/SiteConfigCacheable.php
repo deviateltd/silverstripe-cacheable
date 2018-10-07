@@ -12,8 +12,8 @@ class SiteConfigCacheable extends DataExtension
     public function onAfterWrite()
     {
         $stage_mode_mapping = array(
-            "Stage" => "stage",
-            "Live"  => "live",
+            "Stage" => "Stage",
+            "Live"  => "Live",
         );
         
         foreach ($stage_mode_mapping as $stage => $mode) {

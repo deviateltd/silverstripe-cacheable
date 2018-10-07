@@ -51,7 +51,7 @@ class CacheableNavigationService
 
     /**
      * 
-     * @param string $mode e.g. 'live'
+     * @param string $mode e.g. 'Live'
      * @param SiteConfig $config
      * @param DataObject $model
      */
