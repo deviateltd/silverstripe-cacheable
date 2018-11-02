@@ -345,7 +345,7 @@ class CacheableSiteTree extends CacheableData
     public function debug_simple()
     {
         $message = "<h5>cacheable data: " . get_class($this) . "</h5><ul>";
-        $message .= "<il>ID: " . $this->ID . ". Title: " . $this->Title . ". ClassName" . $this->ClassName . "</il>";
+        $message .= "<il>ID: " . $this->ID . ". Title: " . $this->Title . ". ClassName: " . $this->ClassName . ". Link: ".$this->Link.".</il>";
         $parent = $this->getParent();
         if ($parent && $parent->exists()) {
             $message .= "<il>Parent ID: " . $parent->ID . ". Title: " . $parent->Title . ". ClassName" . $parent->ClassName . "</il>";

@@ -83,6 +83,8 @@ class CacheableNavigation_Rebuild extends BuildTask
         $siteConfigs = DataObject::get('SiteConfig');
         foreach ($stage_mode_mapping as $stage => $mode) {
             Versioned::reading_stage($stage);
+            Versioned::set_default_reading_mode('Stage.'.$stage);
+
             if (class_exists('Subsite')) {
                 Subsite::disable_subsite_filter(true);
                 Config::inst()->update("CacheableSiteConfig", 'cacheable_fields', array('SubsiteID'));
@@ -182,6 +184,7 @@ class CacheableNavigation_Rebuild extends BuildTask
         }
 
         Versioned::reading_stage($currentStage);
+        Versioned::set_default_reading_mode('Stage.'.$currentStage);
         
         $endTime = time();
         $totalTime = ($endTime - $startTime);
