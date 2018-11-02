@@ -127,6 +127,7 @@ class Cacheable extends SiteTreeExtension
         $currentStage = Versioned::current_stage();
         foreach ($modes as $stage => $mode) {
             Versioned::reading_stage($stage);
+            Versioned::set_default_reading_mode('Stage.'.$stage);
             $service = new CacheableNavigationService($mode, $siteConfig);
             $cache_frontend = $service->getCacheableFrontEnd();
             $id = $service->getIdentifier();
@@ -144,6 +145,7 @@ class Cacheable extends SiteTreeExtension
             }
         }
         Versioned::reading_stage($currentStage);
+        Versioned::set_default_reading_mode('Stage.'.$currentStage);
     }
 
     /**
@@ -165,6 +167,7 @@ class Cacheable extends SiteTreeExtension
         $currentStage = Versioned::current_stage();
         foreach ($modes as $stage => $mode) {
             Versioned::reading_stage($stage);
+            Versioned::set_default_reading_mode('Stage.'.$stage);
             $service = new CacheableNavigationService($mode, $siteConfig, $this->owner);
             $cache_frontend = $service->getCacheableFrontEnd();
             $id = $service->getIdentifier();
@@ -177,7 +180,8 @@ class Cacheable extends SiteTreeExtension
                 $service->removeCachedPage($forceRemoval);
             }
         }
-        Versioned::current_stage($currentStage);
+        Versioned::reading_stage($currentStage);
+        Versioned::set_default_reading_mode('Stage.'.$currentStage);
     }
 
     /**
