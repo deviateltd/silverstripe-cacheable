@@ -22,3 +22,7 @@ define('CACHEABLE_MODULE_DIR', __DIR__);
 
 CacheableConfig::configure();
 SS_Cache::pick_backend(CACHEABLE_STORE_NAME, CACHEABLE_STORE_FOR, CACHEABLE_STORE_WEIGHT);
+
+// Ensure compatibility with PHP 7.2 ("object" is a reserved word),
+// with SilverStripe 3.6 (using Object) and SilverStripe 3.7 (using SS_Object)
+if (!class_exists('SS_Object')) class_alias('Object', 'SS_Object');

@@ -218,8 +218,8 @@ abstract class CacheableData extends ViewableData
     public function hasFluent()
     {
         return class_exists('Fluent') && (
-                Object::has_extension('SiteTree', 'FluentExtension') &&
-                Object::has_extension('SiteConfig', 'FluentExtension')
+                SS_Object::has_extension('SiteTree', 'FluentExtension') &&
+                SS_Object::has_extension('SiteConfig', 'FluentExtension')
             );
     }
 }

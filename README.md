@@ -4,6 +4,8 @@ Cachable is an Object Cache for SilverStripe. It was originally designed to only
 website navigation hierarchies, in order to improve site performance. Future versions aim
 to allow an increased range of standard SilverStripe DataObjects to be cached.
 
+This version should work with PHP 7.2 and SilverStripe 3.7
+
 At its core is `Zend_Cache` and as such the module can use the Memcache, Memcached, APCu or File
 Zend Backend cache's. See: `code/_config.php`.
 
